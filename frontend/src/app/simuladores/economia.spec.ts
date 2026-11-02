@@ -12,8 +12,9 @@ registerLocaleData(localePt);
 describe('Economia', () => {
   const economia = vi.fn();
 
-  const montar = async (valores: Record<string, string>) => {
+  const montar = async (valores: Record<string, string>, retorno?: unknown) => {
     economia.mockReset();
+    economia.mockReturnValue(retorno);
     await TestBed.configureTestingModule({
       imports: [Economia],
       providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: SimulacaoService, useValue: { economia } }],
@@ -35,8 +36,7 @@ describe('Economia', () => {
   const valido = { objetivo: '1000', economiaMensal: '100' };
 
   it('valido mostra meses e economia anual', async () => {
-    economia.mockReturnValue(of({ mesesNecessarios: 10, economiaAnual: 1200 }));
-    const el = await montar(valido);
+    const el = await montar(valido, of({ mesesNecessarios: 10, economiaAnual: 1200 }));
     expect(economia).toHaveBeenCalledWith({ objetivo: 1000, economiaMensal: 100 });
     const texto = el.textContent!.replaceAll(' ', ' ');
     expect(texto).toContain('10 meses');
@@ -50,8 +50,7 @@ describe('Economia', () => {
   });
 
   it('erro mostra o detail', async () => {
-    economia.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
-    const el = await montar(valido);
+    const el = await montar(valido, throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
     expect(el.querySelector('[role=alert]')?.textContent).toContain('Regra violada');
     expect(el.querySelector('button')!.disabled).toBe(false);
   });

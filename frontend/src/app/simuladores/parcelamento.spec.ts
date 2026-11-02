@@ -12,8 +12,9 @@ registerLocaleData(localePt);
 describe('Parcelamento', () => {
   const parcelamento = vi.fn();
 
-  const montar = async (valores: Record<string, string>) => {
+  const montar = async (valores: Record<string, string>, retorno?: unknown) => {
     parcelamento.mockReset();
+    parcelamento.mockReturnValue(retorno);
     await TestBed.configureTestingModule({
       imports: [Parcelamento],
       providers: [{ provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: SimulacaoService, useValue: { parcelamento } }],
@@ -35,8 +36,7 @@ describe('Parcelamento', () => {
   const valido = { valor: '1000', taxaMensal: '0', parcelas: '10' };
 
   it('valido mostra parcela e juros em reais', async () => {
-    parcelamento.mockReturnValue(of({ valorParcela: 100, totalPago: 1000, totalJuros: 0 }));
-    const el = await montar(valido);
+    const el = await montar(valido, of({ valorParcela: 100, totalPago: 1000, totalJuros: 0 }));
     expect(parcelamento).toHaveBeenCalledWith({ valor: 1000, taxaMensal: 0, parcelas: 10 });
     const texto = el.textContent!.replaceAll(' ', ' ');
     expect(texto).toContain('R$ 100,00');
@@ -50,8 +50,7 @@ describe('Parcelamento', () => {
   });
 
   it('erro mostra o detail', async () => {
-    parcelamento.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
-    const el = await montar(valido);
+    const el = await montar(valido, throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
     expect(el.querySelector('[role=alert]')?.textContent).toContain('Regra violada');
     expect(el.querySelector('button')!.disabled).toBe(false);
   });
