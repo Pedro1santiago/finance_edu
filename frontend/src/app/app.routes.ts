@@ -4,6 +4,7 @@ import { Cadastro } from './auth/cadastro';
 import { Login } from './auth/login';
 import { authGuard, visitanteGuard } from './core/auth.guard';
 import { Layout } from './core/layout/layout';
+import { Modulos } from './conteudos/modulos';
 import { MetaDetalhe } from './metas/meta-detalhe';
 import { Metas } from './metas/metas';
 import { Simuladores } from './simuladores/simuladores';
@@ -21,7 +22,7 @@ export const routes: Routes = [
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
       { path: 'dashboard', component: Placeholder },
-      { path: 'conteudos', component: Placeholder },
+      { path: 'conteudos', component: Modulos },
       { path: 'simuladores', component: Simuladores },
       { path: 'metas', component: Metas },
       { path: 'metas/:id', component: MetaDetalhe },
