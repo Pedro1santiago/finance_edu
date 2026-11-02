@@ -1,0 +1,14 @@
+services:
+  postgres:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: financeedu
+      POSTGRES_USER: financeedu
+      POSTGRES_PASSWORD: financeedu
+    ports:
+      - "5433:5432" # 5433 para não conflitar com Postgres local
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+volumes:
+  pgdata:

@@ -1,0 +1,19 @@
+spring:
+  application:
+    name: finance-edu
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5433/financeedu}
+    username: ${DB_USER:financeedu}
+    password: ${DB_PASSWORD:financeedu}
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: validate
+
+app:
+  jwt:
+    # HS256 exige ao menos 32 bytes; troque via variável de ambiente em produção
+    secret: ${JWT_SECRET:dev-secret-troque-em-producao-0123456789abcdef}
+    expiracao-horas: 24
+  cors:
+    origens: ${CORS_ORIGENS:http://localhost:4200}
