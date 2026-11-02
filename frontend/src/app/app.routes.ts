@@ -1,13 +1,16 @@
 import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
-import { authGuard } from './core/auth.guard';
+import { Cadastro } from './auth/cadastro';
+import { Login } from './auth/login';
+import { authGuard, visitanteGuard } from './core/auth.guard';
 import { Layout } from './core/layout/layout';
 
 @Component({ template: '' })
 class Placeholder {}
 
 export const routes: Routes = [
-  { path: 'login', component: Placeholder },
+  { path: 'login', component: Login, canActivate: [visitanteGuard] },
+  { path: 'cadastro', component: Cadastro, canActivate: [visitanteGuard] },
   {
     path: '',
     component: Layout,

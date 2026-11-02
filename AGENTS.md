@@ -16,7 +16,7 @@ Testes de integração usam Testcontainers e são pulados sem Docker.
 
 Frontend (Angular 21, Vitest; `npm start` sobe em `localhost:4200`):
 ```bash
-cd frontend && npm run lint && npx tsc --noEmit -p tsconfig.app.json && npm test -- --watch=false
+cd frontend && npm run lint && npx tsc --noEmit -p tsconfig.app.json && npm test -- --no-watch
 ```
 
 ## Regras do repositório

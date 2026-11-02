@@ -1,6 +1,7 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { Component } from '@angular/core';
+import { AuthService } from '../../auth/auth.service';
 import { Layout } from './layout';
 
 @Component({ template: '' })
@@ -19,5 +20,18 @@ describe('Layout', () => {
     fixture.detectChanges();
     const ativo = el.querySelector('nav a[aria-current="page"]');
     expect(ativo?.textContent?.trim()).toBe('Metas');
+  });
+
+  it('botao Sair chama AuthService.sair', async () => {
+    const sair = vi.fn();
+    await TestBed.configureTestingModule({
+      imports: [Layout],
+      providers: [provideRouter([]), { provide: AuthService, useValue: { sair } }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Layout);
+    await fixture.whenStable();
+    const botao = Array.from((fixture.nativeElement as HTMLElement).querySelectorAll('button')).find((b) => b.textContent?.trim() === 'Sair');
+    botao!.click();
+    expect(sair).toHaveBeenCalled();
   });
 });
