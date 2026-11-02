@@ -1,4 +1,3 @@
-import { Component } from '@angular/core';
 import { Routes } from '@angular/router';
 import { Cadastro } from './auth/cadastro';
 import { Login } from './auth/login';
@@ -7,12 +6,10 @@ import { Layout } from './core/layout/layout';
 import { ConteudoLeitura } from './conteudos/conteudo-leitura';
 import { ModuloDetalhe } from './conteudos/modulo-detalhe';
 import { Modulos } from './conteudos/modulos';
+import { Dashboard } from './dashboard/dashboard';
 import { MetaDetalhe } from './metas/meta-detalhe';
 import { Metas } from './metas/metas';
 import { Simuladores } from './simuladores/simuladores';
-
-@Component({ template: '' })
-class Placeholder {}
 
 export const routes: Routes = [
   { path: 'login', component: Login, canActivate: [visitanteGuard] },
@@ -23,7 +20,7 @@ export const routes: Routes = [
     canActivate: [authGuard],
     children: [
       { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
-      { path: 'dashboard', component: Placeholder },
+      { path: 'dashboard', component: Dashboard },
       { path: 'conteudos', component: Modulos },
       { path: 'conteudos/modulos/:id', component: ModuloDetalhe },
       { path: 'conteudos/:id', component: ConteudoLeitura },
