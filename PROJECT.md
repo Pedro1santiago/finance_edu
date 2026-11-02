@@ -55,7 +55,7 @@ Jovens, estudantes e adultos aprendem finanças em conteúdos soltos (vídeos, p
 - [x] Frontend base: Angular em `frontend/`, layout, interceptor JWT, guard, CI com back + front
 - [x] Front auth: telas de login e cadastro, logout, rota protegida
 - [x] Front simuladores: 4 formulários com resultado e gráfico de evolução do investimento
-- [ ] Front metas: lista, criar/editar/excluir, detalhe com aportes e progresso
+- [x] Front metas: lista, criar/editar/excluir, detalhe com aportes e progresso
 - [ ] Front conteúdos: módulos, leitura, marcar concluído, progresso por módulo
 - [ ] Front dashboard: indicadores e gráfico de aportes por mês (Chart.js)
 - [ ] Deploy-ready: Dockerfile do backend, render.yaml, vercel.json, README raiz (sem deploy real)
