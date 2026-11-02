@@ -4,7 +4,7 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Subject, of, throwError } from 'rxjs';
+import { Observable, Subject, of, throwError } from 'rxjs';
 import { Meta, MetaService } from './meta.service';
 import { Metas } from './metas';
 
@@ -27,9 +27,9 @@ const meta = (extra: Partial<Meta> = {}): Meta => ({
 describe('Metas', () => {
   const service = { listar: vi.fn(), criar: vi.fn(), alterar: vi.fn(), excluir: vi.fn() };
 
-  const montar = async (lista: Meta[]) => {
+  const montar = async (lista: Meta[], retorno: Observable<Meta[]> = of(lista)) => {
     Object.values(service).forEach((f) => f.mockReset());
-    service.listar.mockReturnValue(of(lista));
+    service.listar.mockReturnValue(retorno);
     await TestBed.configureTestingModule({
       imports: [Metas],
       providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: MetaService, useValue: service }],
@@ -78,6 +78,21 @@ describe('Metas', () => {
     expect(service.alterar).toHaveBeenCalledWith(3, { nome: 'Casa', valorAlvo: 5000, prazo: '2099-01-01' });
     expect(service.listar).toHaveBeenCalledTimes(2);
     expect(el.querySelector('article form')).toBeNull();
+  });
+
+  it('falha ao listar mostra o erro em vez do estado vazio', async () => {
+    const { el } = await montar([], throwError(() => new HttpErrorResponse({ status: 500 })));
+    expect(el.textContent).toContain('Não foi possível conectar');
+    expect(el.textContent).not.toContain('Nenhuma meta');
+  });
+
+  it('falha ao excluir mostra o erro', async () => {
+    vi.spyOn(window, 'confirm').mockReturnValue(true);
+    const { el, atualizar } = await montar([meta({ id: 3 })]);
+    service.excluir.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'nao pode' } })));
+    el.querySelector<HTMLButtonElement>('article button.excluir')!.click();
+    await atualizar();
+    expect(el.textContent).toContain('nao pode');
   });
 
   describe('excluir', () => {
