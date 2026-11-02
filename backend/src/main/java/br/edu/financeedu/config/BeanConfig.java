@@ -1,9 +1,12 @@
 package br.edu.financeedu.config;
 
 import br.edu.financeedu.application.service.AuthService;
+import br.edu.financeedu.application.service.MetaService;
 import br.edu.financeedu.application.service.SimulacaoService;
 import br.edu.financeedu.domain.port.in.AuthUseCase;
+import br.edu.financeedu.domain.port.in.MetaUseCase;
 import br.edu.financeedu.domain.port.in.SimulacaoUseCase;
+import br.edu.financeedu.domain.port.out.MetaRepositoryPort;
 import br.edu.financeedu.domain.port.out.PasswordHasherPort;
 import br.edu.financeedu.domain.port.out.SimulacaoRepositoryPort;
 import br.edu.financeedu.domain.port.out.TokenPort;
@@ -32,5 +35,10 @@ public class BeanConfig {
     @Bean
     SimulacaoUseCase simulacaoUseCase(SimulacaoRepositoryPort simulacoes, Clock clock) {
         return new SimulacaoService(simulacoes, clock);
+    }
+
+    @Bean
+    MetaUseCase metaUseCase(MetaRepositoryPort metas, Clock clock) {
+        return new MetaService(metas, clock);
     }
 }
