@@ -53,7 +53,7 @@ public class ConteudoService implements ConteudoUseCase {
         return conteudos.listarModulos().stream().map(m -> {
             List<Conteudo> lista = porModulo.getOrDefault(m.id(), List.of());
             int feitos = (int) lista.stream().filter(c -> concluidos.contains(c.id())).count();
-            return new ProgressoModulo(m.id(), m.titulo(), lista.size(), feitos);
+            return ProgressoModulo.de(m.id(), m.titulo(), lista.size(), feitos);
         }).toList();
     }
 

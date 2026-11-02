@@ -14,7 +14,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @RestController
@@ -25,12 +24,6 @@ class ConteudoController {
         static ConteudoResponse de(ConteudoDoUsuario c) {
             var x = c.conteudo();
             return new ConteudoResponse(x.id(), x.moduloId(), x.titulo(), x.corpo(), x.ordem(), c.concluido());
-        }
-    }
-
-    record ProgressoResponse(Long moduloId, String titulo, int total, int concluidos, BigDecimal percentual) {
-        static ProgressoResponse de(ProgressoModulo p) {
-            return new ProgressoResponse(p.moduloId(), p.titulo(), p.total(), p.concluidos(), p.percentual());
         }
     }
 
@@ -62,7 +55,7 @@ class ConteudoController {
     }
 
     @GetMapping("/progresso/conteudos")
-    List<ProgressoResponse> progresso(@AuthenticationPrincipal Jwt jwt) {
-        return conteudos.progresso(UsuarioLogado.id(jwt)).stream().map(ProgressoResponse::de).toList();
+    List<ProgressoModulo> progresso(@AuthenticationPrincipal Jwt jwt) {
+        return conteudos.progresso(UsuarioLogado.id(jwt));
     }
 }
