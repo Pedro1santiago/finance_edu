@@ -72,8 +72,9 @@ describe('MetaDetalhe', () => {
   });
 
   describe('aporte', () => {
-    const enviar = async (valor: string) => {
+    const enviar = async (valor: string, retorno?: unknown) => {
       const { el, atualizar } = await montar();
+      service.registrarAporte.mockReturnValue(retorno);
       const i = el.querySelector<HTMLInputElement>('input[name=valor]')!;
       i.value = valor;
       i.dispatchEvent(new Event('input'));
@@ -86,8 +87,7 @@ describe('MetaDetalhe', () => {
     };
 
     it('valido registra com data de hoje e recarrega meta e aportes', async () => {
-      service.registrarAporte.mockReturnValue(of(aporte));
-      await enviar('1000');
+      await enviar('1000', of(aporte));
       expect(service.registrarAporte).toHaveBeenCalledWith(7, { valor: 1000, data: new Date().toLocaleDateString('sv') });
       expect(service.buscar).toHaveBeenCalledTimes(2);
       expect(service.aportes).toHaveBeenCalledTimes(2);
@@ -99,8 +99,7 @@ describe('MetaDetalhe', () => {
     });
 
     it('desabilita o botao em voo e envia uma vez so', async () => {
-      service.registrarAporte.mockReturnValue(new Subject());
-      const { el, submeter } = await enviar('1000');
+      const { el, submeter } = await enviar('1000', new Subject());
       await submeter();
       expect(service.registrarAporte).toHaveBeenCalledTimes(1);
       expect(el.querySelector<HTMLButtonElement>('form button[type=submit]')!.disabled).toBe(true);
