@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: finance-edu-api
+    runtime: docker
+    rootDir: backend
+    plan: free
+    healthCheckPath: /v3/api-docs
+    envVars:
+      - key: DB_URL
+        sync: false
+      - key: DB_USER
+        sync: false
+      - key: DB_PASSWORD
+        sync: false
+      - key: JWT_SECRET
+        generateValue: true
+      - key: CORS_ORIGENS
+        sync: false
