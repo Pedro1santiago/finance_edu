@@ -151,9 +151,9 @@ describe('MetaDetalhe', () => {
       await atualizar();
     };
     await enviar('10');
-    expect(el.textContent).toContain('Não foi possível conectar');
+    expect(el.textContent).toContain('Erro no servidor, tente novamente');
     await enviar('20');
-    expect(el.textContent).not.toContain('Não foi possível conectar');
+    expect(el.textContent).not.toContain('Erro no servidor, tente novamente');
   });
 
   it('404 mostra Meta nao encontrada com link para /metas', async () => {

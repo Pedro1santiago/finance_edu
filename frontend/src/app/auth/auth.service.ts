@@ -6,7 +6,8 @@ import { environment } from '../../environments/environment';
 import { gravarToken, removerToken } from '../core/token';
 
 export const mensagemErro = (e: unknown) =>
-  (e instanceof HttpErrorResponse && e.error?.detail) || 'Não foi possível conectar';
+  (e instanceof HttpErrorResponse && e.error?.detail) ||
+  (e instanceof HttpErrorResponse && e.status !== 0 ? 'Erro no servidor, tente novamente' : 'Não foi possível conectar');
 
 interface Resposta {
   token: string;

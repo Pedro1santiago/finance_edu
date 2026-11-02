@@ -100,7 +100,7 @@ describe('ConteudoLeitura', () => {
       const { el, atualizar } = await abrir();
       botao(el)!.click();
       await atualizar();
-      expect(el.querySelector('[role=alert]')!.textContent).toContain('Não foi possível conectar');
+      expect(el.querySelector('[role=alert]')!.textContent).toContain('Erro no servidor, tente novamente');
       expect(botao(el)!.disabled).toBe(false);
       service.concluir.mockReturnValueOnce(new Subject());
       botao(el)!.click();
@@ -112,6 +112,6 @@ describe('ConteudoLeitura', () => {
   it('erro de carga mostra alerta', async () => {
     service.conteudo.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
     const { el } = await abrir();
-    expect(el.querySelector('[role=alert]')!.textContent).toContain('Não foi possível conectar');
+    expect(el.querySelector('[role=alert]')!.textContent).toContain('Erro no servidor, tente novamente');
   });
 });
