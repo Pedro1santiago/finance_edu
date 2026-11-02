@@ -23,7 +23,7 @@ import { ConteudoService, Modulo, ProgressoModulo } from './conteudo.service';
         }
       </article>
     } @empty {
-      @if (!erro()) {
+      @if (!carregando() && !erro()) {
         <p>Nenhum módulo.</p>
       }
     }
@@ -34,14 +34,19 @@ export class Modulos {
   modulos = signal<Modulo[]>([]);
   progresso = signal<Record<number, ProgressoModulo>>({});
   erro = signal('');
+  carregando = signal(true);
 
   constructor() {
     forkJoin({ modulos: this.api.modulos(), progresso: this.api.progresso() }).subscribe({
       next: (r) => {
         this.modulos.set(r.modulos);
         this.progresso.set(Object.fromEntries(r.progresso.map((p) => [p.moduloId, p])));
+        this.carregando.set(false);
       },
-      error: (e) => this.erro.set(mensagemErro(e)),
+      error: (e) => {
+        this.erro.set(mensagemErro(e));
+        this.carregando.set(false);
+      },
     });
   }
 }

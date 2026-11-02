@@ -4,7 +4,7 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { ConteudoService } from './conteudo.service';
 import { Modulos } from './modulos';
 
@@ -49,6 +49,20 @@ describe('Modulos', () => {
     expect(el.querySelectorAll('progress').length).toBe(2);
     expect(el.querySelector('progress')!.value).toBe(50);
     expect(el.querySelector('a')!.getAttribute('href')).toBe('/conteudos/modulos/1');
+  });
+
+  it('nao mostra estado vazio enquanto carrega', async () => {
+    service.modulos.mockReturnValue(new Subject());
+    service.progresso.mockReturnValue(new Subject());
+    const el = await abrir();
+    expect(el.textContent).not.toContain('Nenhum módulo');
+  });
+
+  it('lista vazia depois de carregar mostra estado vazio', async () => {
+    service.modulos.mockReturnValue(of([]));
+    service.progresso.mockReturnValue(of([]));
+    const el = await abrir();
+    expect(el.textContent).toContain('Nenhum módulo');
   });
 
   it('erro de carga mostra alerta e nao estado vazio', async () => {
