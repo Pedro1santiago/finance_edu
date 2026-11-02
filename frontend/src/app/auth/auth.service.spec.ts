@@ -1,10 +1,10 @@
-import { provideHttpClient } from '@angular/common/http';
+import { HttpErrorResponse, provideHttpClient } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
 import { environment } from '../../environments/environment';
 import { gravarToken, lerToken, removerToken } from '../core/token';
-import { AuthService } from './auth.service';
+import { AuthService, mensagemErro } from './auth.service';
 
 describe('AuthService', () => {
   let service: AuthService;
@@ -37,5 +37,14 @@ describe('AuthService', () => {
     service.sair();
     expect(lerToken()).toBeNull();
     expect(navigate).toHaveBeenCalledWith('/login');
+  });
+
+  describe('mensagemErro', () => {
+    it('usa o detail quando existe', () =>
+      expect(mensagemErro(new HttpErrorResponse({ status: 400, error: { detail: 'Email em uso' } }))).toBe('Email em uso'));
+    it('status 0 e falha de conexao', () =>
+      expect(mensagemErro(new HttpErrorResponse({ status: 0 }))).toBe('Não foi possível conectar'));
+    it('500 sem detail e erro do servidor', () =>
+      expect(mensagemErro(new HttpErrorResponse({ status: 500 }))).toBe('Erro no servidor, tente novamente'));
   });
 });

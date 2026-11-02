@@ -87,7 +87,7 @@ describe('Metas', () => {
 
   it('falha ao listar mostra o erro em vez do estado vazio', async () => {
     const { el } = await montar([], throwError(() => new HttpErrorResponse({ status: 500 })));
-    expect(el.textContent).toContain('Não foi possível conectar');
+    expect(el.textContent).toContain('Erro no servidor, tente novamente');
     expect(el.textContent).not.toContain('Nenhuma meta');
   });
 

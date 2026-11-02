@@ -57,5 +57,5 @@ Jovens, estudantes e adultos aprendem finanças em conteúdos soltos (vídeos, p
 - [x] Front simuladores: 4 formulários com resultado e gráfico de evolução do investimento
 - [x] Front metas: lista, criar/editar/excluir, detalhe com aportes e progresso
 - [x] Front conteúdos: módulos, leitura, marcar concluído, progresso por módulo
-- [ ] Front dashboard: indicadores e gráfico de aportes por mês (Chart.js)
+- [x] Front dashboard: indicadores e gráfico de aportes por mês (Chart.js)
 - [ ] Deploy-ready: Dockerfile do backend, render.yaml, vercel.json, README raiz (sem deploy real)

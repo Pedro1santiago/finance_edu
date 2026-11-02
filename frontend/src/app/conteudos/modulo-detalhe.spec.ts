@@ -71,7 +71,7 @@ describe('ModuloDetalhe', () => {
   it('erro de carga mostra alerta', async () => {
     service.modulos.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
     const el = await abrir();
-    expect(el.querySelector('[role=alert]')!.textContent).toContain('Não foi possível conectar');
+    expect(el.querySelector('[role=alert]')!.textContent).toContain('Erro no servidor, tente novamente');
     expect(el.querySelectorAll('li').length).toBe(0);
   });
 });

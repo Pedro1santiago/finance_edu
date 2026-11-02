@@ -69,7 +69,7 @@ describe('Modulos', () => {
     service.modulos.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 500 })));
     service.progresso.mockReturnValue(of([]));
     const el = await abrir();
-    expect(el.querySelector('[role=alert]')!.textContent).toContain('Não foi possível conectar');
+    expect(el.querySelector('[role=alert]')!.textContent).toContain('Erro no servidor, tente novamente');
     expect(el.textContent).not.toContain('Nenhum módulo');
   });
 });
