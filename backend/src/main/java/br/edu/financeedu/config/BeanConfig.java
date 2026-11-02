@@ -1,7 +1,10 @@
 package br.edu.financeedu.config;
 
 import br.edu.financeedu.application.service.AuthService;
+import br.edu.financeedu.application.service.ConteudoService;
 import br.edu.financeedu.application.service.MetaService;
+import br.edu.financeedu.domain.port.in.ConteudoUseCase;
+import br.edu.financeedu.domain.port.out.ConteudoRepositoryPort;
 import br.edu.financeedu.application.service.SimulacaoService;
 import br.edu.financeedu.domain.port.in.AuthUseCase;
 import br.edu.financeedu.domain.port.in.MetaUseCase;
@@ -40,5 +43,10 @@ public class BeanConfig {
     @Bean
     MetaUseCase metaUseCase(MetaRepositoryPort metas, Clock clock) {
         return new MetaService(metas, clock);
+    }
+
+    @Bean
+    ConteudoUseCase conteudoUseCase(ConteudoRepositoryPort conteudos) {
+        return new ConteudoService(conteudos);
     }
 }
