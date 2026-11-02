@@ -80,6 +80,27 @@ describe('Metas', () => {
     expect(el.querySelector('article form')).toBeNull();
   });
 
+  describe('excluir', () => {
+    const clicar = async (confirmar: boolean) => {
+      vi.spyOn(window, 'confirm').mockReturnValue(confirmar);
+      const { el, atualizar } = await montar([meta({ id: 3 })]);
+      service.excluir.mockReturnValue(of(undefined));
+      el.querySelector<HTMLButtonElement>('article button.excluir')!.click();
+      await atualizar();
+    };
+
+    it('cancelar nao chama excluir', async () => {
+      await clicar(false);
+      expect(service.excluir).not.toHaveBeenCalled();
+    });
+
+    it('confirmar chama excluir e recarrega', async () => {
+      await clicar(true);
+      expect(service.excluir).toHaveBeenCalledWith(3);
+      expect(service.listar).toHaveBeenCalledTimes(2);
+    });
+  });
+
   describe('criar', () => {
     const preencher = (el: HTMLElement, valores: Record<string, string>) => {
       for (const [nome, valor] of Object.entries(valores)) {

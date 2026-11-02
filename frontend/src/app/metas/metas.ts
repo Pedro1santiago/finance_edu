@@ -17,6 +17,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
         <progress max="100" [value]="m.percentualAtingido"></progress>
         <p>{{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }} até {{ m.prazo | date }}</p>
         <button type="button" (click)="editando.set(m.id)">Editar</button>
+        <button type="button" class="excluir" (click)="excluir(m.id)">Excluir</button>
         @if (editando() === m.id) {
           <app-form-meta [inicial]="m" [acao]="alterar(m.id)" (salvo)="editando.set(null); carregar()" />
         }
@@ -33,6 +34,10 @@ export class Metas {
   editando = signal<number | null>(null);
   criar = (d: MetaIn) => this.api.criar(d);
   alterar = (id: number) => (d: MetaIn) => this.api.alterar(id, d);
+
+  excluir(id: number) {
+    if (confirm('Excluir esta meta?')) this.api.excluir(id).subscribe(() => this.carregar());
+  }
 
   constructor() {
     this.carregar();
