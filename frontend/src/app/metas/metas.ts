@@ -15,7 +15,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
         <h3><a [routerLink]="[m.id]">{{ m.nome }}</a></h3>
         <p>{{ m.status }} · {{ m.percentualAtingido }}%</p>
         <progress max="100" [value]="m.percentualAtingido"></progress>
-        <p>{{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }} até {{ m.prazo | date }}</p>
+        <p>{{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }} até {{ m.prazo | date: 'dd/MM/yyyy' }}</p>
         <button type="button" (click)="editando.set(m.id)">Editar</button>
         <button type="button" class="excluir" (click)="excluir(m.id)">Excluir</button>
         @if (editando() === m.id) {
