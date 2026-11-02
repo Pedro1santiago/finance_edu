@@ -4,7 +4,7 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { Aporte, Meta, MetaService } from './meta.service';
 import { MetaDetalhe } from './meta-detalhe';
 
@@ -69,6 +69,42 @@ describe('MetaDetalhe', () => {
     expect(texto).toContain('10/05/2027');
     expect(el.querySelector('progress')!.value).toBe(20);
     expect(el.querySelectorAll('li').length).toBe(1);
+  });
+
+  describe('aporte', () => {
+    const enviar = async (valor: string) => {
+      const { el, atualizar } = await montar();
+      const i = el.querySelector<HTMLInputElement>('input[name=valor]')!;
+      i.value = valor;
+      i.dispatchEvent(new Event('input'));
+      const submeter = async () => {
+        el.querySelector('form')!.dispatchEvent(new Event('submit'));
+        await atualizar();
+      };
+      await submeter();
+      return { el, submeter };
+    };
+
+    it('valido registra com data de hoje e recarrega meta e aportes', async () => {
+      service.registrarAporte.mockReturnValue(of(aporte));
+      await enviar('1000');
+      expect(service.registrarAporte).toHaveBeenCalledWith(7, { valor: 1000, data: new Date().toLocaleDateString('sv') });
+      expect(service.buscar).toHaveBeenCalledTimes(2);
+      expect(service.aportes).toHaveBeenCalledTimes(2);
+    });
+
+    it('valor zero nao chama', async () => {
+      await enviar('0');
+      expect(service.registrarAporte).not.toHaveBeenCalled();
+    });
+
+    it('desabilita o botao em voo e envia uma vez so', async () => {
+      service.registrarAporte.mockReturnValue(new Subject());
+      const { el, submeter } = await enviar('1000');
+      await submeter();
+      expect(service.registrarAporte).toHaveBeenCalledTimes(1);
+      expect(el.querySelector<HTMLButtonElement>('form button[type=submit]')!.disabled).toBe(true);
+    });
   });
 
   it('404 mostra Meta nao encontrada com link para /metas', async () => {
