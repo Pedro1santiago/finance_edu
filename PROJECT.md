@@ -51,11 +51,11 @@ Jovens, estudantes e adultos aprendem finanças em conteúdos soltos (vídeos, p
 - Cálculos financeiros errados — testes unitários com valores de referência.
 
 ## Roadmap
-- [ ] Setup monorepo: backend compila, Flyway, Angular base, CI (dia 1-2)
-- [ ] Auth: register/login/me + telas de login/cadastro + guard (dia 3-5)
-- [ ] Simuladores: calculadora + endpoints + telas com resultado e gráfico (dia 6-8)
-- [ ] Metas e aportes: back + telas lista/detalhe/aporte (dia 9-12)
-- [ ] Conteúdos: seed + leitura + concluir + progresso (dia 13-14)
-- [ ] Dashboard: indicadores + gráficos Chart.js (dia 15-16)
-- [ ] Deploy Render/Neon/Vercel + README (dia 17-18)
-- [ ] Folga, testes finais e apresentação (dia 19-20)
+- [x] Backend: setup, auth JWT, simuladores, metas/aportes, conteúdos, dashboard (`backend/`)
+- [ ] Frontend base: Angular em `frontend/`, layout, interceptor JWT, guard, CI com back + front
+- [ ] Front auth: telas de login e cadastro, logout, rota protegida
+- [ ] Front simuladores: 4 formulários com resultado e gráfico de evolução do investimento
+- [ ] Front metas: lista, criar/editar/excluir, detalhe com aportes e progresso
+- [ ] Front conteúdos: módulos, leitura, marcar concluído, progresso por módulo
+- [ ] Front dashboard: indicadores e gráfico de aportes por mês (Chart.js)
+- [ ] Deploy-ready: Dockerfile do backend, render.yaml, vercel.json, README raiz (sem deploy real)
