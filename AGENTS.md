@@ -19,6 +19,11 @@ Frontend (Angular 21, Vitest; `npm start` sobe em `localhost:4200`):
 cd frontend && npm run lint && npx tsc --noEmit -p tsconfig.app.json && npm test -- --no-watch
 ```
 
+Artefatos de deploy (Dockerfile, render.yaml, vercel.json, README), na raiz:
+```bash
+node scripts/verificar-deploy.mjs
+```
+
 ## Regras do repositório
 - Trabalho na branch `dev`; branches de fatia saem da `dev` e voltam por merge local.
 - Nunca fazer push.
