@@ -83,7 +83,10 @@ describe('Dashboard', () => {
     aportes.next([]);
     aportes.complete();
     const el = await atualizar(fixture);
-    expect(el.textContent).toMatch(/R\$\s0,00/);
+    expect(el.textContent).toMatch(/Total economizado: R\$\s0,00/);
+    expect(el.textContent).toContain('Metas ativas: 0 · Metas concluídas: 0');
+    expect(el.textContent).toContain('Progresso médio das metas: 0%');
+    expect(el.textContent).toContain('Conteúdos concluídos: 0%');
     expect(el.textContent).toContain('Nenhum aporte nos últimos 12 meses');
     expect(el.textContent).toContain('Nenhuma simulação ainda');
     expect(el.querySelector('a[href="/simuladores"]')).not.toBeNull();
@@ -105,10 +108,10 @@ describe('Dashboard', () => {
     expect(el.querySelector('canvas')).not.toBeNull();
     const texto = el.textContent!;
     expect(texto).not.toContain('Carregando…');
-    expect(texto).toMatch(/R\$\s1\.500,50/);
-    expect(texto).toContain('2');
-    expect(texto).toContain('42,5%');
-    expect(texto).toContain('50%');
+    expect(texto).toMatch(/Total economizado: R\$\s1\.500,50/);
+    expect(texto).toContain('Metas ativas: 2 · Metas concluídas: 1');
+    expect(texto).toContain('Progresso médio das metas: 42,5%');
+    expect(texto).toContain('Conteúdos concluídos: 50%');
     expect(texto).toContain('Orcamento');
     expect(texto).toContain('1 de 2');
     expect(el.querySelector('progress')!.value).toBe(50);
