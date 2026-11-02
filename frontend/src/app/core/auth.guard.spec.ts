@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRouteSnapshot, Router, UrlTree, provideRouter } from '@angular/router';
-import { authGuard } from './auth.guard';
+import { authGuard, visitanteGuard } from './auth.guard';
 import { gravarToken, removerToken } from './token';
 
 describe('authGuard', () => {
@@ -22,5 +22,26 @@ describe('authGuard', () => {
   it('libera com token', () => {
     gravarToken('abc');
     expect(executar()).toBe(true);
+  });
+});
+
+describe('visitanteGuard', () => {
+  beforeEach(() => {
+    removerToken();
+    TestBed.configureTestingModule({ providers: [provideRouter([])] });
+  });
+
+  const executar = () =>
+    TestBed.runInInjectionContext(() =>
+      visitanteGuard(new ActivatedRouteSnapshot(), TestBed.inject(Router).routerState.snapshot),
+    );
+
+  it('libera sem token', () => {
+    expect(executar()).toBe(true);
+  });
+
+  it('redireciona para /dashboard com token', () => {
+    gravarToken('abc');
+    expect(TestBed.inject(Router).serializeUrl(executar() as UrlTree)).toBe('/dashboard');
   });
 });
