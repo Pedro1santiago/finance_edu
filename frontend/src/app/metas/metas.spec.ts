@@ -57,6 +57,11 @@ describe('Metas', () => {
     expect(el.querySelector('progress')!.value).toBe(20);
   });
 
+  it('percentual usa formato pt-BR', async () => {
+    const { el } = await montar([meta({ percentualAtingido: 46.25 })]);
+    expect(el.textContent).toContain('46,25%');
+  });
+
   it('sem metas mostra estado vazio', async () => {
     const { el } = await montar([]);
     expect(el.textContent).toContain('Nenhuma meta');

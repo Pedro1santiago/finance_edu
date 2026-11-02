@@ -1,4 +1,4 @@
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { mensagemErro } from '../auth/auth.service';
@@ -7,7 +7,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
 
 @Component({
   selector: 'app-metas',
-  imports: [CurrencyPipe, DatePipe, FormMeta, RouterLink],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, FormMeta, RouterLink],
   template: `
     <h2>Metas</h2>
     <app-form-meta [acao]="criar" (salvo)="carregar()" />
@@ -17,7 +17,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
     @for (m of metas(); track m.id) {
       <article>
         <h3><a [routerLink]="[m.id]">{{ m.nome }}</a></h3>
-        <p>{{ m.status }} · {{ m.percentualAtingido }}%</p>
+        <p>{{ m.status }} · {{ m.percentualAtingido | number: '1.0-2' }}%</p>
         <progress max="100" [value]="m.percentualAtingido"></progress>
         <p>{{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }} até {{ m.prazo | date: 'dd/MM/yyyy' }}</p>
         <button type="button" (click)="editando.set(m.id)">Editar</button>

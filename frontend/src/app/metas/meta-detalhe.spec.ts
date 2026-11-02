@@ -93,6 +93,23 @@ describe('MetaDetalhe', () => {
       expect(service.aportes).toHaveBeenCalledTimes(2);
     });
 
+    it('aporte valido apos invalido remove a mensagem de validacao', async () => {
+      const { el, atualizar } = await montar();
+      service.registrarAporte.mockReturnValue(of(aporte));
+      const enviarValor = async (valor: string) => {
+        const i = el.querySelector<HTMLInputElement>('input[name=valor]')!;
+        i.value = valor;
+        i.dispatchEvent(new Event('input'));
+        el.querySelector('form')!.dispatchEvent(new Event('submit'));
+        await atualizar();
+      };
+      await enviarValor('0');
+      expect(el.textContent).toContain('Informe um valor');
+      await enviarValor('100');
+      expect(service.registrarAporte).toHaveBeenCalledTimes(1);
+      expect(el.textContent).not.toContain('Informe um valor');
+    });
+
     it('valor zero nao chama', async () => {
       await enviar('0');
       expect(service.registrarAporte).not.toHaveBeenCalled();
@@ -104,6 +121,14 @@ describe('MetaDetalhe', () => {
       expect(service.registrarAporte).toHaveBeenCalledTimes(1);
       expect(el.querySelector<HTMLButtonElement>('form button[type=submit]')!.disabled).toBe(true);
     });
+  });
+
+  it('percentual usa formato pt-BR', async () => {
+    Object.values(service).forEach((f) => f.mockReset());
+    service.buscar.mockReturnValue(of(meta({ percentualAtingido: 46.25 })));
+    service.aportes.mockReturnValue(of([]));
+    const { el } = await abrir();
+    expect(el.textContent).toContain('46,25%');
   });
 
   it.each(['abc', '0', '-1', '1.5'])('id invalido (%s) mostra Meta nao encontrada sem requisicao', async (id) => {

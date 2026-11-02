@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { CurrencyPipe, DatePipe } from '@angular/common';
+import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { FormControl, FormGroup, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -13,7 +13,7 @@ const naoEncontrada = 'Meta não encontrada';
 
 @Component({
   selector: 'app-meta-detalhe',
-  imports: [CurrencyPipe, DatePipe, ReactiveFormsModule, RouterLink],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, RouterLink],
   template: `
     <a routerLink="/metas">Voltar</a>
     @if (erro()) {
@@ -21,7 +21,7 @@ const naoEncontrada = 'Meta não encontrada';
     }
     @if (meta(); as m) {
       <h2>{{ m.nome }}</h2>
-      <p>{{ m.status }} · {{ m.percentualAtingido }}%</p>
+      <p>{{ m.status }} · {{ m.percentualAtingido | number: '1.0-2' }}%</p>
       <progress max="100" [value]="m.percentualAtingido"></progress>
       <p>Economizado: {{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }}</p>
       <p>Restante: {{ m.valorRestante | currency: 'BRL' }}</p>
@@ -78,7 +78,7 @@ export class MetaDetalhe {
     this.api.registrarAporte(this.id, { valor, data }).subscribe({
       next: () => {
         this.enviando.set(false);
-        this.form.controls.valor.reset();
+        this.form.reset({ valor: null, data });
         this.carregar();
       },
       error: (e) => {
