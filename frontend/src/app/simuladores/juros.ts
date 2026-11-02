@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Estado, FormSimulador, naoNegativo, positivo, prazo } from './form-simulador';
-import { JurosIn, JurosOut, SimulacaoService } from './simulacao.service';
+import { SimulacaoService } from './simulacao.service';
 
 @Component({
   selector: 'app-juros',
@@ -18,12 +18,12 @@ import { JurosIn, JurosOut, SimulacaoService } from './simulacao.service';
 })
 export class Juros {
   private api = inject(SimulacaoService);
-  estado = new Estado<JurosOut>(
+  estado = new Estado(
     [
       { nome: 'capital', rotulo: 'Capital', validadores: [positivo] },
       { nome: 'taxaMensal', rotulo: 'Taxa mensal (%)', validadores: naoNegativo },
       { nome: 'meses', rotulo: 'Prazo (meses)', validadores: prazo },
     ],
-    (v) => this.api.jurosCompostos(v as unknown as JurosIn),
+    (v) => this.api.jurosCompostos(v),
   );
 }

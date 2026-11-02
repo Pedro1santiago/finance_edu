@@ -1,7 +1,7 @@
 import { CurrencyPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Estado, FormSimulador, positivo } from './form-simulador';
-import { EconomiaIn, EconomiaOut, SimulacaoService } from './simulacao.service';
+import { SimulacaoService } from './simulacao.service';
 
 @Component({
   selector: 'app-economia',
@@ -18,11 +18,11 @@ import { EconomiaIn, EconomiaOut, SimulacaoService } from './simulacao.service';
 })
 export class Economia {
   private api = inject(SimulacaoService);
-  estado = new Estado<EconomiaOut>(
+  estado = new Estado(
     [
       { nome: 'objetivo', rotulo: 'Objetivo', validadores: [positivo] },
       { nome: 'economiaMensal', rotulo: 'Economia mensal', validadores: [positivo] },
     ],
-    (v) => this.api.economia(v as unknown as EconomiaIn),
+    (v) => this.api.economia(v),
   );
 }

@@ -54,6 +54,17 @@ describe('Investimento', () => {
     expect(el.querySelector('[role=alert]')).not.toBeNull();
   });
 
+  it('erro apos sucesso nao deixa resultado nem grafico antigos', async () => {
+    const el = await montar(valido, of({ saldoFinal: 2500.5, totalInvestido: 2200, totalJuros: 300.5, evolucao }));
+    expect(el.querySelector('canvas')).not.toBeNull();
+    investimento.mockReturnValue(throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
+    el.querySelector('form')!.dispatchEvent(new Event('submit'));
+    await new Promise((r) => setTimeout(r));
+    expect(el.querySelector('[role=alert]')?.textContent).toContain('Regra violada');
+    expect(el.querySelector('canvas')).toBeNull();
+    expect(el.textContent).not.toContain('Saldo final');
+  });
+
   it('erro mostra o detail e sem grafico', async () => {
     const el = await montar(valido, throwError(() => new HttpErrorResponse({ status: 422, error: { detail: 'Regra violada' } })));
     expect(el.querySelector('[role=alert]')?.textContent).toContain('Regra violada');

@@ -2,7 +2,7 @@ import { CurrencyPipe } from '@angular/common';
 import { Component, inject } from '@angular/core';
 import { Estado, FormSimulador, naoNegativo, prazo } from './form-simulador';
 import { GraficoEvolucao } from './grafico-evolucao';
-import { InvestimentoIn, InvestimentoOut, SimulacaoService } from './simulacao.service';
+import { SimulacaoService } from './simulacao.service';
 
 @Component({
   selector: 'app-investimento',
@@ -21,13 +21,13 @@ import { InvestimentoIn, InvestimentoOut, SimulacaoService } from './simulacao.s
 })
 export class Investimento {
   private api = inject(SimulacaoService);
-  estado = new Estado<InvestimentoOut>(
+  estado = new Estado(
     [
       { nome: 'valorInicial', rotulo: 'Valor inicial', validadores: naoNegativo },
       { nome: 'aporteMensal', rotulo: 'Aporte mensal', validadores: naoNegativo },
       { nome: 'taxaMensal', rotulo: 'Taxa mensal (%)', validadores: naoNegativo },
       { nome: 'meses', rotulo: 'Prazo (meses)', validadores: prazo },
     ],
-    (v) => this.api.investimento(v as unknown as InvestimentoIn),
+    (v) => this.api.investimento(v),
   );
 }

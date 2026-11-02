@@ -12,7 +12,7 @@ describe('GraficoEvolucao', () => {
     fixture.componentRef.setInput('evolucao', evolucao);
     await fixture.whenStable();
     expect(fixture.nativeElement.querySelector('canvas')).not.toBeNull();
-    const cfg = vi.mocked(Chart).mock.calls[0][1] as { data: { labels: number[]; datasets: { label: string }[] } };
+    const cfg = vi.mocked(Chart).mock.calls.at(-1)![1] as { data: { labels: number[]; datasets: { label: string }[] } };
     expect(cfg.data.labels).toHaveLength(12);
     expect(cfg.data.datasets.map((d) => d.label)).toEqual(['Saldo', 'Total investido']);
   });
