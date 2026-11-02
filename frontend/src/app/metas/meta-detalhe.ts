@@ -6,7 +6,10 @@ import { ActivatedRoute, RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { mensagemErro } from '../auth/auth.service';
 import { positivo } from '../simuladores/form-simulador';
+import { hoje } from './form-meta';
 import { Aporte, Meta, MetaService } from './meta.service';
+
+const naoEncontrada = 'Meta não encontrada';
 
 @Component({
   selector: 'app-meta-detalhe',
@@ -59,7 +62,7 @@ export class MetaDetalhe {
   erroAporte = signal('');
   form = new FormGroup({
     valor: new FormControl<number | null>(null, [Validators.required, positivo]),
-    data: new FormControl(new Date().toLocaleDateString('sv'), { nonNullable: true, validators: Validators.required }),
+    data: new FormControl(hoje(), { nonNullable: true, validators: Validators.required }),
   });
 
   constructor() {
@@ -86,12 +89,14 @@ export class MetaDetalhe {
   }
 
   carregar() {
+    if (!Number.isInteger(this.id) || this.id <= 0) return this.erro.set(naoEncontrada);
     forkJoin({ meta: this.api.buscar(this.id), aportes: this.api.aportes(this.id) }).subscribe({
       next: (r) => {
+        this.erro.set('');
         this.meta.set(r.meta);
         this.aportes.set(r.aportes);
       },
-      error: (e) => this.erro.set(e instanceof HttpErrorResponse && e.status === 404 ? 'Meta não encontrada' : mensagemErro(e)),
+      error: (e) => this.erro.set(e instanceof HttpErrorResponse && e.status === 404 ? naoEncontrada : mensagemErro(e)),
     });
   }
 }

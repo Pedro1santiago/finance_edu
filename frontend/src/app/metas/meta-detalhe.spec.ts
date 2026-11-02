@@ -35,14 +35,14 @@ describe('MetaDetalhe', () => {
     return abrir();
   };
 
-  const abrir = async () => {
+  const abrir = async (id = '7') => {
     await TestBed.configureTestingModule({
       imports: [MetaDetalhe],
       providers: [
         provideRouter([]),
         { provide: LOCALE_ID, useValue: 'pt-BR' },
         { provide: MetaService, useValue: service },
-        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id: '7' }) } } },
+        { provide: ActivatedRoute, useValue: { snapshot: { paramMap: convertToParamMap({ id }) } } },
       ],
     }).compileComponents();
     const fixture = TestBed.createComponent(MetaDetalhe);
@@ -104,6 +104,31 @@ describe('MetaDetalhe', () => {
       expect(service.registrarAporte).toHaveBeenCalledTimes(1);
       expect(el.querySelector<HTMLButtonElement>('form button[type=submit]')!.disabled).toBe(true);
     });
+  });
+
+  it.each(['abc', '0', '-1', '1.5'])('id invalido (%s) mostra Meta nao encontrada sem requisicao', async (id) => {
+    Object.values(service).forEach((f) => f.mockReset());
+    const { el } = await abrir(id);
+    expect(el.textContent).toContain('Meta não encontrada');
+    expect(service.buscar).not.toHaveBeenCalled();
+    expect(service.aportes).not.toHaveBeenCalled();
+  });
+
+  it('recarga bem-sucedida limpa o erro anterior', async () => {
+    const { el, atualizar } = await montar();
+    service.buscar.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+    service.registrarAporte.mockReturnValue(of(aporte));
+    const enviar = async (valor: string) => {
+      const i = el.querySelector<HTMLInputElement>('input[name=valor]')!;
+      i.value = valor;
+      i.dispatchEvent(new Event('input'));
+      el.querySelector('form')!.dispatchEvent(new Event('submit'));
+      await atualizar();
+    };
+    await enviar('10');
+    expect(el.textContent).toContain('Não foi possível conectar');
+    await enviar('20');
+    expect(el.textContent).not.toContain('Não foi possível conectar');
   });
 
   it('404 mostra Meta nao encontrada com link para /metas', async () => {
