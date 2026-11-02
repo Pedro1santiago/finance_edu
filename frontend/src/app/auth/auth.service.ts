@@ -1,9 +1,12 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpErrorResponse } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Router } from '@angular/router';
 import { tap } from 'rxjs';
 import { environment } from '../../environments/environment';
 import { gravarToken, removerToken } from '../core/token';
+
+export const mensagemErro = (e: unknown) =>
+  (e instanceof HttpErrorResponse && e.error?.detail) || 'Não foi possível conectar';
 
 interface Resposta {
   token: string;
