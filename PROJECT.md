@@ -53,7 +53,7 @@ Jovens, estudantes e adultos aprendem finanças em conteúdos soltos (vídeos, p
 ## Roadmap
 - [x] Backend: setup, auth JWT, simuladores, metas/aportes, conteúdos, dashboard (`backend/`)
 - [x] Frontend base: Angular em `frontend/`, layout, interceptor JWT, guard, CI com back + front
-- [ ] Front auth: telas de login e cadastro, logout, rota protegida
+- [x] Front auth: telas de login e cadastro, logout, rota protegida
 - [ ] Front simuladores: 4 formulários com resultado e gráfico de evolução do investimento
 - [ ] Front metas: lista, criar/editar/excluir, detalhe com aportes e progresso
 - [ ] Front conteúdos: módulos, leitura, marcar concluído, progresso por módulo
