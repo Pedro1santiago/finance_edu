@@ -22,8 +22,13 @@ const dados: Dados = {
 
 describe('Dashboard', () => {
   const service = { obter: vi.fn(), evolucaoAportes: vi.fn() };
-  const resumo = new Subject<Dados>();
-  const aportes = new Subject<{ mes: string; total: number }[]>();
+  let resumo: Subject<Dados>;
+  let aportes: Subject<{ mes: string; total: number }[]>;
+
+  beforeEach(() => {
+    resumo = new Subject();
+    aportes = new Subject();
+  });
 
   const abrir = async () => {
     service.obter.mockReturnValue(resumo);
@@ -67,6 +72,19 @@ describe('Dashboard', () => {
     const depois = await atualizar(fixture);
     expect(depois.querySelector('[role=alert]')).toBeNull();
     expect(depois.textContent).toContain('Total economizado');
+  });
+
+  it('usuario novo ve zeros, estado vazio de simulacoes e link para metas', async () => {
+    const fixture = await abrir();
+    resumo.next({ ...dados, totalEconomizado: 0, metasAtivas: 0, metasConcluidas: 0, percentualMedioMetas: 0, percentualConteudos: 0, progressoConteudos: [], ultimasSimulacoes: [] });
+    resumo.complete();
+    aportes.next([]);
+    aportes.complete();
+    const el = await atualizar(fixture);
+    expect(el.textContent).toMatch(/R\$\s0,00/);
+    expect(el.textContent).toContain('Nenhuma simulação ainda');
+    expect(el.querySelector('a[href="/simuladores"]')).not.toBeNull();
+    expect(el.querySelector('a[href="/metas"]')).not.toBeNull();
   });
 
   it('mostra Carregando e nenhum indicador antes da resposta, depois os valores', async () => {

@@ -1,5 +1,6 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { mensagemErro } from '../auth/auth.service';
 import { AporteMes, Dashboard as Dados, DashboardService, TipoSimulacao } from './dashboard.service';
@@ -13,7 +14,7 @@ const rotulos: Record<TipoSimulacao, string> = {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
   template: `
     <h2>Dashboard</h2>
     @if (carregando()) {
@@ -36,6 +37,11 @@ const rotulos: Record<TipoSimulacao, string> = {
       <h3>Últimas simulações</h3>
       @for (s of d.ultimasSimulacoes; track s.id) {
         <p>{{ rotulos[s.tipo] }} · {{ s.criadaEm | date: 'dd/MM/yyyy' }}</p>
+      } @empty {
+        <p>Nenhuma simulação ainda. <a routerLink="/simuladores">Ir para simuladores</a></p>
+      }
+      @if (!d.metasAtivas && !d.metasConcluidas) {
+        <p><a routerLink="/metas">Criar uma meta</a></p>
       }
     }
   `,
