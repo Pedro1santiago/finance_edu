@@ -4,6 +4,8 @@ import { Cadastro } from './auth/cadastro';
 import { Login } from './auth/login';
 import { authGuard, visitanteGuard } from './core/auth.guard';
 import { Layout } from './core/layout/layout';
+import { MetaDetalhe } from './metas/meta-detalhe';
+import { Metas } from './metas/metas';
 import { Simuladores } from './simuladores/simuladores';
 
 @Component({ template: '' })
@@ -21,7 +23,8 @@ export const routes: Routes = [
       { path: 'dashboard', component: Placeholder },
       { path: 'conteudos', component: Placeholder },
       { path: 'simuladores', component: Simuladores },
-      { path: 'metas', component: Placeholder },
+      { path: 'metas', component: Metas },
+      { path: 'metas/:id', component: MetaDetalhe },
     ],
   },
 ];
