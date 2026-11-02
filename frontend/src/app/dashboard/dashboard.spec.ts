@@ -8,6 +8,8 @@ import { Subject, of, throwError } from 'rxjs';
 import { Dashboard } from './dashboard';
 import { Dashboard as Dados, DashboardService } from './dashboard.service';
 
+vi.mock('chart.js/auto', () => ({ Chart: vi.fn(function () { return { destroy: vi.fn() }; }) }));
+
 registerLocaleData(localePt);
 
 const dados: Dados = {
@@ -82,6 +84,7 @@ describe('Dashboard', () => {
     aportes.complete();
     const el = await atualizar(fixture);
     expect(el.textContent).toMatch(/R\$\s0,00/);
+    expect(el.textContent).toContain('Nenhum aporte nos últimos 12 meses');
     expect(el.textContent).toContain('Nenhuma simulação ainda');
     expect(el.querySelector('a[href="/simuladores"]')).not.toBeNull();
     expect(el.querySelector('a[href="/metas"]')).not.toBeNull();
@@ -96,9 +99,10 @@ describe('Dashboard', () => {
 
     resumo.next(dados);
     resumo.complete();
-    aportes.next([]);
+    aportes.next([{ mes: '2026-03', total: 80 }]);
     aportes.complete();
     const el = await atualizar(fixture);
+    expect(el.querySelector('canvas')).not.toBeNull();
     const texto = el.textContent!;
     expect(texto).not.toContain('Carregando…');
     expect(texto).toMatch(/R\$\s1\.500,50/);

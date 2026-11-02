@@ -4,6 +4,7 @@ import { RouterLink } from '@angular/router';
 import { forkJoin } from 'rxjs';
 import { mensagemErro } from '../auth/auth.service';
 import { AporteMes, Dashboard as Dados, DashboardService, TipoSimulacao } from './dashboard.service';
+import { GraficoAportes } from './grafico-aportes';
 
 const rotulos: Record<TipoSimulacao, string> = {
   JUROS_COMPOSTOS: 'Juros compostos',
@@ -14,7 +15,7 @@ const rotulos: Record<TipoSimulacao, string> = {
 
 @Component({
   selector: 'app-dashboard',
-  imports: [CurrencyPipe, DatePipe, DecimalPipe, RouterLink],
+  imports: [CurrencyPipe, DatePipe, DecimalPipe, GraficoAportes, RouterLink],
   template: `
     <h2>Dashboard</h2>
     @if (carregando()) {
@@ -34,6 +35,8 @@ const rotulos: Record<TipoSimulacao, string> = {
           <p>{{ p.concluidos }} de {{ p.total }} concluídos</p>
         </article>
       }
+      <h3>Aportes por mês</h3>
+      <app-grafico-aportes [aportes]="aportes()" />
       <h3>Últimas simulações</h3>
       @for (s of d.ultimasSimulacoes; track s.id) {
         <p>{{ rotulos[s.tipo] }} · {{ s.criadaEm | date: 'dd/MM/yyyy' }}</p>
