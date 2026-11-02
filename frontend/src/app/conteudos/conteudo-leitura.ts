@@ -17,6 +17,11 @@ const naoEncontrado = 'Conteúdo não encontrado';
     @if (conteudo(); as c) {
       <h2>{{ c.titulo }}</h2>
       <p>{{ c.corpo }}</p>
+      @if (c.concluido) {
+        <p>Concluído</p>
+      } @else {
+        <button type="button" [disabled]="enviando()" (click)="concluir()">Marcar como concluído</button>
+      }
     }
   `,
 })
@@ -25,9 +30,26 @@ export class ConteudoLeitura {
   private id = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
   conteudo = signal<Conteudo | null>(null);
   erro = signal('');
+  enviando = signal(false);
 
   constructor() {
     this.carregar();
+  }
+
+  concluir() {
+    if (this.enviando()) return;
+    this.erro.set('');
+    this.enviando.set(true);
+    this.api.concluir(this.id).subscribe({
+      next: () => {
+        this.enviando.set(false);
+        this.conteudo.update((c) => c && { ...c, concluido: true });
+      },
+      error: (e) => {
+        this.erro.set(mensagemErro(e));
+        this.enviando.set(false);
+      },
+    });
   }
 
   private carregar() {

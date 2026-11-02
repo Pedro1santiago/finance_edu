@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { ActivatedRoute, convertToParamMap, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { Conteudo, ConteudoService } from './conteudo.service';
 import { ConteudoLeitura } from './conteudo-leitura';
 
@@ -62,6 +62,51 @@ describe('ConteudoLeitura', () => {
     const { el } = await abrir('999999');
     expect(el.textContent).toContain('Conteúdo não encontrado');
     expect(el.querySelector('a')!.getAttribute('href')).toBe('/conteudos');
+  });
+
+  describe('concluir', () => {
+    const botao = (el: HTMLElement) => el.querySelector<HTMLButtonElement>('button');
+
+    it('chama concluir, mostra Concluido e esconde o botao sem refetch', async () => {
+      service.concluir.mockReturnValue(of(undefined));
+      const { el, atualizar } = await abrir();
+      botao(el)!.click();
+      await atualizar();
+      expect(service.concluir).toHaveBeenCalledWith(10);
+      expect(el.textContent).toContain('Concluído');
+      expect(botao(el)).toBeNull();
+      expect(service.conteudo).toHaveBeenCalledTimes(1);
+    });
+
+    it('ja concluido nao mostra botao', async () => {
+      service.conteudo.mockReturnValue(of(conteudo({ concluido: true })));
+      const { el } = await abrir();
+      expect(el.textContent).toContain('Concluído');
+      expect(botao(el)).toBeNull();
+    });
+
+    it('desabilita em voo e envia uma vez so', async () => {
+      service.concluir.mockReturnValue(new Subject());
+      const { el, atualizar } = await abrir();
+      botao(el)!.click();
+      botao(el)!.click();
+      await atualizar();
+      expect(service.concluir).toHaveBeenCalledTimes(1);
+      expect(botao(el)!.disabled).toBe(true);
+    });
+
+    it('erro mostra alerta, reabilita e limpa na nova tentativa', async () => {
+      service.concluir.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status: 500 })));
+      const { el, atualizar } = await abrir();
+      botao(el)!.click();
+      await atualizar();
+      expect(el.querySelector('[role=alert]')!.textContent).toContain('Não foi possível conectar');
+      expect(botao(el)!.disabled).toBe(false);
+      service.concluir.mockReturnValueOnce(new Subject());
+      botao(el)!.click();
+      await atualizar();
+      expect(el.querySelector('[role=alert]')).toBeNull();
+    });
   });
 
   it('erro de carga mostra alerta', async () => {
