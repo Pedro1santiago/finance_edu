@@ -34,7 +34,7 @@ export class Cadastro {
   private router = inject(Router);
   erro = signal('');
   form = inject(FormBuilder).nonNullable.group({
-    nome: ['', [Validators.required, Validators.maxLength(120)]],
+    nome: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(180)]],
     senha: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
   });

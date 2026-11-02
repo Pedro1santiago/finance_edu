@@ -41,6 +41,15 @@ describe('Cadastro', () => {
     expect(el.querySelector('[role=alert]')?.textContent).toContain('8 a 72');
   });
 
+  it('nome so com espacos nao chama a API', async () => {
+    const { preencher, enviar } = await montar();
+    preencher('nome', '   ');
+    preencher('email', 'a@a.com');
+    preencher('senha', '12345678');
+    await enviar();
+    expect(registrar).not.toHaveBeenCalled();
+  });
+
   it('sucesso chama o service e navega para /dashboard', async () => {
     const { navigate, preencher, enviar } = await montar();
     registrar.mockReturnValue(of({}));

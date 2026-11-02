@@ -15,8 +15,9 @@ describe('authGuard', () => {
     );
 
   it('redireciona para /login sem token', () => {
-    const r = executar() as UrlTree;
-    expect(TestBed.inject(Router).serializeUrl(r)).toBe('/login');
+    const r = executar();
+    expect(r).toBeInstanceOf(UrlTree);
+    if (r instanceof UrlTree) expect(TestBed.inject(Router).serializeUrl(r)).toBe('/login');
   });
 
   it('libera com token', () => {
@@ -42,6 +43,8 @@ describe('visitanteGuard', () => {
 
   it('redireciona para /dashboard com token', () => {
     gravarToken('abc');
-    expect(TestBed.inject(Router).serializeUrl(executar() as UrlTree)).toBe('/dashboard');
+    const r = executar();
+    expect(r).toBeInstanceOf(UrlTree);
+    if (r instanceof UrlTree) expect(TestBed.inject(Router).serializeUrl(r)).toBe('/dashboard');
   });
 });
