@@ -3,7 +3,8 @@ import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { Subject } from 'rxjs';
+import { HttpErrorResponse } from '@angular/common/http';
+import { Subject, of, throwError } from 'rxjs';
 import { Dashboard } from './dashboard';
 import { Dashboard as Dados, DashboardService } from './dashboard.service';
 
@@ -41,6 +42,32 @@ describe('Dashboard', () => {
     await fixture.whenStable();
     return fixture.nativeElement as HTMLElement;
   };
+
+  it.each([
+    [500, 'Erro no servidor, tente novamente'],
+    [0, 'Não foi possível conectar'],
+  ])('erro de carga (status %i) mostra alerta; tentar novamente limpa e recarrega', async (status, mensagem) => {
+    service.obter.mockReset();
+    service.evolucaoAportes.mockReset();
+    service.obter.mockReturnValueOnce(throwError(() => new HttpErrorResponse({ status })));
+    service.evolucaoAportes.mockReturnValueOnce(of([]));
+    service.obter.mockReturnValueOnce(of(dados));
+    service.evolucaoAportes.mockReturnValueOnce(of([]));
+    await TestBed.configureTestingModule({
+      imports: [Dashboard],
+      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: DashboardService, useValue: service }],
+    }).compileComponents();
+    const fixture = TestBed.createComponent(Dashboard);
+    const el = await atualizar(fixture);
+    expect(el.querySelector('[role=alert]')!.textContent).toContain(mensagem);
+    expect(el.textContent).not.toContain('Carregando…');
+    expect(el.textContent).not.toContain('Total economizado');
+
+    el.querySelector('button')!.click();
+    const depois = await atualizar(fixture);
+    expect(depois.querySelector('[role=alert]')).toBeNull();
+    expect(depois.textContent).toContain('Total economizado');
+  });
 
   it('mostra Carregando e nenhum indicador antes da resposta, depois os valores', async () => {
     const fixture = await abrir();

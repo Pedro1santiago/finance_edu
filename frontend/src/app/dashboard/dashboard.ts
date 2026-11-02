@@ -1,6 +1,7 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
 import { forkJoin } from 'rxjs';
+import { mensagemErro } from '../auth/auth.service';
 import { AporteMes, Dashboard as Dados, DashboardService, TipoSimulacao } from './dashboard.service';
 
 const rotulos: Record<TipoSimulacao, string> = {
@@ -17,6 +18,9 @@ const rotulos: Record<TipoSimulacao, string> = {
     <h2>Dashboard</h2>
     @if (carregando()) {
       <p>Carregando…</p>
+    } @else if (erro()) {
+      <p role="alert">{{ erro() }}</p>
+      <button type="button" (click)="carregar()">Tentar novamente</button>
     } @else if (dados(); as d) {
       <p>Total economizado: {{ d.totalEconomizado | currency: 'BRL' }}</p>
       <p>Metas ativas: {{ d.metasAtivas }} · Metas concluídas: {{ d.metasConcluidas }}</p>
@@ -40,14 +44,27 @@ export class Dashboard {
   private api = inject(DashboardService);
   rotulos = rotulos;
   carregando = signal(true);
+  erro = signal('');
   dados = signal<Dados | null>(null);
   aportes = signal<AporteMes[]>([]);
 
   constructor() {
-    forkJoin({ dados: this.api.obter(), aportes: this.api.evolucaoAportes(12) }).subscribe((r) => {
-      this.dados.set(r.dados);
-      this.aportes.set(r.aportes);
-      this.carregando.set(false);
+    this.carregar();
+  }
+
+  carregar() {
+    this.erro.set('');
+    this.carregando.set(true);
+    forkJoin({ dados: this.api.obter(), aportes: this.api.evolucaoAportes(12) }).subscribe({
+      next: (r) => {
+        this.dados.set(r.dados);
+        this.aportes.set(r.aportes);
+        this.carregando.set(false);
+      },
+      error: (e) => {
+        this.erro.set(mensagemErro(e));
+        this.carregando.set(false);
+      },
     });
   }
 }
