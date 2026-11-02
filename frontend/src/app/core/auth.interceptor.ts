@@ -8,7 +8,7 @@ import { lerToken, removerToken } from './token';
 export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const router = inject(Router);
   const token = lerToken();
-  const daApi = req.url.startsWith(environment.apiUrl) && !req.url.startsWith(`${environment.apiUrl}/api/auth/`);
+  const daApi = req.url.startsWith(`${environment.apiUrl}/`) && !req.url.startsWith(`${environment.apiUrl}/api/auth/`);
   const enviada = token && daApi ? req.clone({ setHeaders: { Authorization: `Bearer ${token}` } }) : req;
   return next(enviada).pipe(
     catchError((e: unknown) => {

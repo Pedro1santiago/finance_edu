@@ -30,10 +30,13 @@ describe('authInterceptor', () => {
     expect(ctrl.expectOne(`${environment.apiUrl}/api/auth/login`).request.headers.has('Authorization')).toBe(false);
   });
 
-  it('nao anexa Bearer em outros hosts', () => {
-    http.get('https://outro.com/x').subscribe();
-    expect(ctrl.expectOne('https://outro.com/x').request.headers.has('Authorization')).toBe(false);
-  });
+  it.each(['https://outro.com/x', `${environment.apiUrl}1/api/metas`, `${environment.apiUrl}.evil.com/api/metas`])(
+    'nao anexa Bearer em %s',
+    (url) => {
+      http.get(url).subscribe();
+      expect(ctrl.expectOne(url).request.headers.has('Authorization')).toBe(false);
+    },
+  );
 
   it('em 401 remove o token e vai para /login', () => {
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
