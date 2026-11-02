@@ -1,9 +1,10 @@
+import { HttpErrorResponse } from '@angular/common/http';
 import { registerLocaleData } from '@angular/common';
 import localePt from '@angular/common/locales/pt';
 import { LOCALE_ID } from '@angular/core';
 import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
-import { of } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { Meta, MetaService } from './meta.service';
 import { Metas } from './metas';
 
@@ -59,5 +60,83 @@ describe('Metas', () => {
   it('sem metas mostra estado vazio', async () => {
     const { el } = await montar([]);
     expect(el.textContent).toContain('Nenhuma meta');
+  });
+
+  it('editar preenche o form, salva com alterar(id, dados) e recarrega', async () => {
+    const { el, atualizar } = await montar([meta({ id: 3, prazo: '2099-01-01' })]);
+    service.alterar.mockReturnValue(of(meta()));
+    el.querySelector<HTMLButtonElement>('article button')!.click();
+    await atualizar();
+    const form = el.querySelector('article form')!;
+    const nome = form.querySelector<HTMLInputElement>('input[name=nome]')!;
+    expect(nome.value).toBe('Viagem');
+    expect(form.querySelector<HTMLInputElement>('input[name=prazo]')!.value).toBe('2099-01-01');
+    nome.value = 'Casa';
+    nome.dispatchEvent(new Event('input'));
+    form.dispatchEvent(new Event('submit'));
+    await atualizar();
+    expect(service.alterar).toHaveBeenCalledWith(3, { nome: 'Casa', valorAlvo: 5000, prazo: '2099-01-01' });
+    expect(service.listar).toHaveBeenCalledTimes(2);
+    expect(el.querySelector('article form')).toBeNull();
+  });
+
+  describe('criar', () => {
+    const preencher = (el: HTMLElement, valores: Record<string, string>) => {
+      for (const [nome, valor] of Object.entries(valores)) {
+        const i = el.querySelector<HTMLInputElement>(`input[name=${nome}]`)!;
+        i.value = valor;
+        i.dispatchEvent(new Event('input'));
+      }
+    };
+    const enviar = async (el: HTMLElement, atualizar: () => Promise<void>) => {
+      el.querySelector('form')!.dispatchEvent(new Event('submit'));
+      await atualizar();
+    };
+    const valido = { nome: 'Viagem', valorAlvo: '5000', prazo: '2099-01-01' };
+    const erro422 = (detail: string) => new HttpErrorResponse({ status: 422, error: { detail } });
+
+    it('valido chama criar e recarrega a lista', async () => {
+      const { el, atualizar } = await montar([]);
+      service.criar.mockReturnValue(of(meta()));
+      preencher(el, valido);
+      await enviar(el, atualizar);
+      expect(service.criar).toHaveBeenCalledWith({ nome: 'Viagem', valorAlvo: 5000, prazo: '2099-01-01' });
+      expect(service.listar).toHaveBeenCalledTimes(2);
+    });
+
+    it.each([
+      ['prazo passado', { ...valido, prazo: '2000-01-01' }],
+      ['valor zero', { ...valido, valorAlvo: '0' }],
+      ['nome vazio', { ...valido, nome: '' }],
+    ])('invalido (%s) nao chama e limpa o erro anterior', async (_, valores) => {
+      const { el, atualizar } = await montar([]);
+      service.criar.mockReturnValue(throwError(() => erro422('falhou')));
+      preencher(el, valido);
+      await enviar(el, atualizar);
+      expect(el.textContent).toContain('falhou');
+      service.criar.mockClear();
+      preencher(el, valores);
+      await enviar(el, atualizar);
+      expect(service.criar).not.toHaveBeenCalled();
+      expect(el.textContent).not.toContain('falhou');
+    });
+
+    it('desabilita o botao em voo e envia uma vez so', async () => {
+      const { el, atualizar } = await montar([]);
+      service.criar.mockReturnValue(new Subject());
+      preencher(el, valido);
+      await enviar(el, atualizar);
+      await enviar(el, atualizar);
+      expect(service.criar).toHaveBeenCalledTimes(1);
+      expect(el.querySelector<HTMLButtonElement>('form button[type=submit]')!.disabled).toBe(true);
+    });
+
+    it('422 mostra o detail', async () => {
+      const { el, atualizar } = await montar([]);
+      service.criar.mockReturnValue(throwError(() => erro422('Prazo no passado')));
+      preencher(el, valido);
+      await enviar(el, atualizar);
+      expect(el.textContent).toContain('Prazo no passado');
+    });
   });
 });
