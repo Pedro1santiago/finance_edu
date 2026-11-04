@@ -83,7 +83,22 @@ class ApiIntegrationTest {
     }
 
     @Test
-    void erroDeFrameworkVira400ComProblemDetail() throws Exception {
+    void senhaComAcentosAcimaDe72BytesNaoDa500() throws Exception {
+        String senha = "é".repeat(40);
+        String email = UUID.randomUUID() + "@teste.com";
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome":"Ana","email":"%s","senha":"%s"}""".formatted(email, senha)))
+                .andExpect(status().isUnprocessableContent())
+                .andExpect(jsonPath("$.detail").value(org.hamcrest.Matchers.containsString("72 bytes")));
+        mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","senha":"%s"}""".formatted(email, senha)))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
+    void erroDeFrameworkVira400ComProblemDetail()throws Exception {
         String token = registrar();
         mvc.perform(post("/api/metas").header("Authorization", token)
                         .contentType(MediaType.APPLICATION_JSON).content("{quebrado"))
