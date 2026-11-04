@@ -58,6 +58,60 @@ class CalculadoraFinanceiraTest {
         assertThat(r.economiaAnual()).isEqualByComparingTo("3600.00");
     }
 
+    private static final String LIMITE = "9999999999999.99";
+    private static final String ACIMA = "10000000000000";
+
+    @Test
+    void taxaMensalFicaEntreZeroECem() {
+        assertThat(CalculadoraFinanceira.jurosCompostos(bd("1000"), bd("100"), 1).montante()).isEqualByComparingTo("2000.00");
+        assertThatThrownBy(() -> CalculadoraFinanceira.jurosCompostos(bd("1000"), bd("100.01"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.investimento(bd("0"), bd("100"), bd("1000"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.parcelamento(bd("1000"), bd("1000"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void valoresMonetariosTemTeto() {
+        assertThat(CalculadoraFinanceira.economia(bd(LIMITE), bd(LIMITE)).mesesNecessarios()).isEqualTo(1);
+        assertThatThrownBy(() -> CalculadoraFinanceira.jurosCompostos(bd(ACIMA), bd("1"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.investimento(bd(ACIMA), bd("1"), bd("1"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.investimento(bd("1"), bd(ACIMA), bd("1"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.parcelamento(bd(ACIMA), bd("1"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.economia(bd(ACIMA), bd("1")))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.economia(bd("1"), bd(ACIMA)))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void economiaAcimaDeMilEDuzentosMesesEhRejeitada() {
+        assertThat(CalculadoraFinanceira.economia(bd("1200"), bd("1")).mesesNecessarios()).isEqualTo(1200);
+        assertThatThrownBy(() -> CalculadoraFinanceira.economia(bd("1201"), bd("1")))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.economia(bd(LIMITE), bd("0.01")))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void parcelamentoComTaxaMinusculaNaoDividePorZero() {
+        assertThatThrownBy(() -> CalculadoraFinanceira.parcelamento(bd("1000"), bd("0.0000000001"), 12))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThat(CalculadoraFinanceira.parcelamento(bd("1000"), bd("0.0001"), 12).totalJuros().signum()).isGreaterThanOrEqualTo(0);
+    }
+
+    @Test
+    void parcelamentoSemJurosNaoPerdeCentavos() {
+        var r = CalculadoraFinanceira.parcelamento(bd("1000"), bd("0"), 12);
+        assertThat(r.totalPago()).isEqualByComparingTo("1000.00");
+        assertThat(r.totalJuros()).isEqualByComparingTo("0.00");
+    }
+
     @Test
     void rejeitaEntradasInvalidas() {
         assertThatThrownBy(() -> CalculadoraFinanceira.jurosCompostos(bd("0"), bd("1"), 12))
