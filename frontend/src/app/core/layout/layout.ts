@@ -19,8 +19,9 @@ import { AuthService } from '../../auth/auth.service';
     <main><router-outlet /></main>
   `,
   styles: `
-    header { display: flex; gap: 2rem; align-items: center; padding: 1rem; border-bottom: 1px solid var(--borda); }
-    nav { display: flex; gap: 1rem; }
+    header { display: flex; flex-wrap: wrap; gap: 0.5rem 2rem; align-items: center; padding: 1rem; border-bottom: 1px solid var(--borda); }
+    header, header * { overflow-wrap: normal; }
+    nav { display: flex; flex-wrap: wrap; gap: 0.5rem 1rem; }
     button { margin-left: auto; }
     .ativo { font-weight: bold; }
     main { padding: 1rem; }

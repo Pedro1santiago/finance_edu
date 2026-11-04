@@ -3,6 +3,7 @@ import { Cadastro } from './auth/cadastro';
 import { Login } from './auth/login';
 import { authGuard, visitanteGuard } from './core/auth.guard';
 import { Layout } from './core/layout/layout';
+import { NaoEncontrado } from './core/layout/nao-encontrado';
 import { ConteudoLeitura } from './conteudos/conteudo-leitura';
 import { ModuloDetalhe } from './conteudos/modulo-detalhe';
 import { Modulos } from './conteudos/modulos';
@@ -27,6 +28,7 @@ export const routes: Routes = [
       { path: 'simuladores', component: Simuladores },
       { path: 'metas', component: Metas },
       { path: 'metas/:id', component: MetaDetalhe },
+      { path: '**', component: NaoEncontrado },
     ],
   },
 ];

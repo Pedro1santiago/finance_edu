@@ -54,13 +54,13 @@ export class Estado<K extends string, R> {
   }
 
   enviar() {
-    if (this.form.invalid) return this.form.markAllAsTouched();
     if (this.enviando()) return;
+    this.erro.set('');
+    this.resultado.set(null);
+    if (this.form.invalid) return this.form.markAllAsTouched();
     const valores = this.form.getRawValue();
     if (!preenchido<K>(valores)) return this.form.markAllAsTouched();
     this.enviando.set(true);
-    this.erro.set('');
-    this.resultado.set(null);
     this.chamar(valores).subscribe({
       next: (r) => {
         this.resultado.set(r);

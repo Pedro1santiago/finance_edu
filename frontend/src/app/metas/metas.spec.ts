@@ -62,6 +62,12 @@ describe('Metas', () => {
     expect(el.textContent).toContain('46,25%');
   });
 
+  it('enquanto carrega mostra Carregando e nao o estado vazio', async () => {
+    const { el } = await montar([], new Subject<Meta[]>());
+    expect(el.textContent).toContain('Carregando…');
+    expect(el.textContent).not.toContain('Nenhuma meta');
+  });
+
   it('sem metas mostra estado vazio', async () => {
     const { el } = await montar([]);
     expect(el.textContent).toContain('Nenhuma meta');
@@ -149,6 +155,7 @@ describe('Metas', () => {
       ['prazo passado', { ...valido, prazo: '2000-01-01' }],
       ['valor zero', { ...valido, valorAlvo: '0' }],
       ['nome vazio', { ...valido, nome: '' }],
+      ['nome so espacos', { ...valido, nome: '   ' }],
     ])('invalido (%s) nao chama e limpa o erro anterior', async (_, valores) => {
       const { el, atualizar } = await montar([]);
       service.criar.mockReturnValue(throwError(() => erro422('falhou')));

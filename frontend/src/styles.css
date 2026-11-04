@@ -1,3 +1,91 @@
 :root {
+  --fundo: #fff;
+  --texto: #1a1a1a;
+  --muted: #666;
   --borda: #ddd;
+  --destaque: #0b5fff;
+  --erro: #b00020;
+  color-scheme: light dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --fundo: #14161a;
+    --texto: #e8e8e8;
+    --muted: #a0a0a0;
+    --borda: #3a3d44;
+    --destaque: #6ea2ff;
+    --erro: #ff6b81;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--fundo);
+  color: var(--texto);
+  font-family: system-ui, sans-serif;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+main,
+app-login,
+app-cadastro {
+  display: block;
+  max-width: 48rem;
+  margin: 0 auto;
+  padding: 1rem;
+}
+
+a {
+  color: var(--destaque);
+}
+
+[role='alert'] {
+  color: var(--erro);
+}
+
+form {
+  display: grid;
+  gap: 0.75rem;
+  margin-block: 1rem;
+}
+
+label {
+  display: grid;
+  gap: 0.25rem;
+}
+
+input,
+button {
+  font: inherit;
+  padding: 0.4rem 0.6rem;
+  color: var(--texto);
+  background: var(--fundo);
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled {
+  color: var(--muted);
+  cursor: not-allowed;
+}
+
+article {
+  margin-block: 1rem;
+  padding: 0.75rem 1rem;
+  border: 1px solid var(--borda);
+  border-radius: 4px;
+}
+
+app-grafico-aportes,
+app-grafico-evolucao {
+  display: block;
+  position: relative;
+  max-height: 320px;
+  height: 320px;
 }
