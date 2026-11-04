@@ -50,7 +50,7 @@ public class SimulacaoService implements SimulacaoUseCase {
     @Override
     public Economia economia(Long usuarioId, ParamEconomia p) {
         return registrar(usuarioId, Tipo.ECONOMIA, p,
-                CalculadoraFinanceira.economia(p.objetivo(), p.economiaMensal()));
+                CalculadoraFinanceira.economia(p.objetivo(), p.economiaMensal(), p.prazoMeses()));
     }
 
     @Override

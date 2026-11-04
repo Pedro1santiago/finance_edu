@@ -37,7 +37,7 @@ public final class CalculadoraFinanceira {
     }
 
     public record Economia(BigDecimal objetivo, BigDecimal economiaMensal, int mesesNecessarios,
-                           BigDecimal economiaAnual) {
+                           BigDecimal economiaAnual, BigDecimal valorMensalNecessario) {
     }
 
     public static JurosCompostos jurosCompostos(BigDecimal capital, BigDecimal taxaMensal, int meses) {
@@ -87,14 +87,18 @@ public final class CalculadoraFinanceira {
         return new Parcelamento(valor, taxaMensal, parcelas, dinheiro(parcela), total, total.subtract(valor).max(BigDecimal.ZERO));
     }
 
-    public static Economia economia(BigDecimal objetivo, BigDecimal economiaMensal) {
+    public static Economia economia(BigDecimal objetivo, BigDecimal economiaMensal, Integer prazoMeses) {
         positivo(objetivo, "objetivo");
         positivo(economiaMensal, "economiaMensal");
+        if (prazoMeses != null) prazo(prazoMeses);
         BigDecimal meses = objetivo.divide(economiaMensal, 0, RoundingMode.CEILING);
         if (meses.compareTo(BigDecimal.valueOf(MAX_MESES)) > 0) {
             throw new RegraNegocioException("objetivo exige mais de " + MAX_MESES + " meses de economia");
         }
-        return new Economia(objetivo, economiaMensal, meses.intValue(), dinheiro(economiaMensal.multiply(BigDecimal.valueOf(12))));
+        BigDecimal valorMensal = prazoMeses == null ? null
+                : objetivo.divide(BigDecimal.valueOf(prazoMeses), 2, RoundingMode.CEILING);
+        return new Economia(objetivo, economiaMensal, meses.intValue(),
+                dinheiro(economiaMensal.multiply(BigDecimal.valueOf(12))), valorMensal);
     }
 
     private static BigDecimal fator(BigDecimal taxaMensal) {

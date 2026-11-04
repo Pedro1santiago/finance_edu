@@ -75,6 +75,16 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void economiaComPrazoDevolveValorMensalNecessario() throws Exception {
+        String token = registrar();
+        String r = json(token, post("/api/simulacoes/economia"), """
+                {"objetivo":1000,"economiaMensal":300,"prazoMeses":12}""", 200);
+        org.assertj.core.api.Assertions.assertThat(JsonPath.<Number>read(r, "$.valorMensalNecessario").doubleValue()).isEqualTo(83.34);
+        org.assertj.core.api.Assertions.assertThat(JsonPath.<Object>read(json(token, post("/api/simulacoes/economia"), """
+                {"objetivo":1000,"economiaMensal":300}""", 200), "$.valorMensalNecessario")).isNull();
+    }
+
+    @Test
     void fluxoCompleto() throws Exception {
         String token = registrar();
         String prazo = LocalDate.now().plusMonths(6).toString();

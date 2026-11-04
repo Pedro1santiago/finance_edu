@@ -20,7 +20,7 @@ public interface SimulacaoUseCase {
     record ParamParcelamento(BigDecimal valor, BigDecimal taxaMensal, int parcelas) {
     }
 
-    record ParamEconomia(BigDecimal objetivo, BigDecimal economiaMensal) {
+    record ParamEconomia(BigDecimal objetivo, BigDecimal economiaMensal, Integer prazoMeses) {
     }
 
     JurosCompostos jurosCompostos(Long usuarioId, ParamJuros p);
