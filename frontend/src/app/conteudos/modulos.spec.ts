@@ -56,6 +56,7 @@ describe('Modulos', () => {
     service.progresso.mockReturnValue(new Subject());
     const el = await abrir();
     expect(el.textContent).not.toContain('Nenhum módulo');
+    expect(el.textContent).toContain('Carregando…');
   });
 
   it('lista vazia depois de carregar mostra estado vazio', async () => {

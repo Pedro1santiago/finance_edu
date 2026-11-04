@@ -62,6 +62,12 @@ describe('Metas', () => {
     expect(el.textContent).toContain('46,25%');
   });
 
+  it('enquanto carrega mostra Carregando e nao o estado vazio', async () => {
+    const { el } = await montar([], new Subject<Meta[]>());
+    expect(el.textContent).toContain('Carregando…');
+    expect(el.textContent).not.toContain('Nenhuma meta');
+  });
+
   it('sem metas mostra estado vazio', async () => {
     const { el } = await montar([]);
     expect(el.textContent).toContain('Nenhuma meta');

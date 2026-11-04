@@ -10,6 +10,9 @@ import { ConteudoService, Modulo, ProgressoModulo } from './conteudo.service';
   imports: [DecimalPipe, RouterLink],
   template: `
     <h2>Conteúdos</h2>
+    @if (carregando()) {
+      <p>Carregando…</p>
+    }
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }

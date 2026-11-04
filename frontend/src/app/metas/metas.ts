@@ -11,6 +11,9 @@ import { Meta, MetaIn, MetaService } from './meta.service';
   template: `
     <h2>Metas</h2>
     <app-form-meta [acao]="criar" (salvo)="carregar()" />
+    @if (carregando()) {
+      <p>Carregando…</p>
+    }
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }
@@ -27,7 +30,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
         }
       </article>
     } @empty {
-      @if (!erro()) {
+      @if (!carregando() && !erro()) {
         <p>Nenhuma meta cadastrada.</p>
       }
     }
@@ -37,6 +40,7 @@ export class Metas {
   private api = inject(MetaService);
   metas = signal<Meta[]>([]);
   erro = signal('');
+  carregando = signal(true);
 
   editando = signal<number | null>(null);
   criar = (d: MetaIn) => this.api.criar(d);
@@ -57,8 +61,12 @@ export class Metas {
       next: (m) => {
         this.erro.set('');
         this.metas.set(m);
+        this.carregando.set(false);
       },
-      error: (e) => this.erro.set(mensagemErro(e)),
+      error: (e) => {
+        this.erro.set(mensagemErro(e));
+        this.carregando.set(false);
+      },
     });
   }
 }
