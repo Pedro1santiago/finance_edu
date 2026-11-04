@@ -5,6 +5,7 @@ import br.edu.financeedu.domain.model.Modulo;
 import br.edu.financeedu.domain.port.out.ConteudoRepositoryPort;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,7 +31,12 @@ class ConteudoPersistenceAdapter implements ConteudoRepositoryPort {
         @Query("select p.conteudoId from ProgressoConteudoEntity p where p.usuarioId = :usuarioId")
         List<Long> conteudosConcluidos(Long usuarioId);
 
-        boolean existsByUsuarioIdAndConteudoId(Long usuarioId, Long conteudoId);
+        @Modifying
+        @Query(nativeQuery = true, value = """
+                insert into progresso_conteudos (usuario_id, conteudo_id, concluido_em)
+                values (:usuarioId, :conteudoId, :concluidoEm)
+                on conflict (usuario_id, conteudo_id) do nothing""")
+        void inserirSeAusente(Long usuarioId, Long conteudoId, Instant concluidoEm);
     }
 
     private final ModuloRepo modulos;
@@ -78,12 +84,6 @@ class ConteudoPersistenceAdapter implements ConteudoRepositoryPort {
     @Override
     @Transactional
     public void marcarConcluido(Long usuarioId, Long conteudoId) {
-        // shortcut: corrida entre duas requisições simultâneas cai na UNIQUE (500); aceitável para o MVP
-        if (progresso.existsByUsuarioIdAndConteudoId(usuarioId, conteudoId)) return;
-        ProgressoConteudoEntity e = new ProgressoConteudoEntity();
-        e.usuarioId = usuarioId;
-        e.conteudoId = conteudoId;
-        e.concluidoEm = Instant.now(clock);
-        progresso.save(e);
+        progresso.inserirSeAusente(usuarioId, conteudoId, Instant.now(clock));
     }
 }

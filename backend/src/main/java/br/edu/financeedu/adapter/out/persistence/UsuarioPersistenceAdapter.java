@@ -1,7 +1,9 @@
 package br.edu.financeedu.adapter.out.persistence;
 
+import br.edu.financeedu.domain.exception.RegraNegocioException;
 import br.edu.financeedu.domain.model.Usuario;
 import br.edu.financeedu.domain.port.out.UsuarioRepositoryPort;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
 
@@ -22,7 +24,11 @@ class UsuarioPersistenceAdapter implements UsuarioRepositoryPort {
 
     @Override
     public Usuario salvar(Usuario usuario) {
-        return repo.save(UsuarioEntity.de(usuario)).paraDominio();
+        try {
+            return repo.saveAndFlush(UsuarioEntity.de(usuario)).paraDominio();
+        } catch (DataIntegrityViolationException e) {
+            throw new RegraNegocioException("Email já cadastrado");
+        }
     }
 
     @Override
