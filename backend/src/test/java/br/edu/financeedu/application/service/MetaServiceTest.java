@@ -4,6 +4,7 @@ import br.edu.financeedu.domain.exception.NaoEncontradoException;
 import br.edu.financeedu.domain.exception.RegraNegocioException;
 import br.edu.financeedu.domain.model.Aporte;
 import br.edu.financeedu.domain.model.Meta;
+import br.edu.financeedu.domain.port.in.MetaUseCase;
 import br.edu.financeedu.domain.port.out.MetaRepositoryPort;
 import org.junit.jupiter.api.Test;
 
@@ -33,6 +34,45 @@ class MetaServiceTest {
 
     private Meta metaExistente() {
         return new Meta(7L, 1L, "Reserva", new BigDecimal("1000"), hoje.plusMonths(6), hoje, List.of());
+    }
+
+    @Test
+    void criaMetaDoUsuarioComDataDeHoje() {
+        when(repo.salvar(any())).thenAnswer(i -> i.getArgument(0));
+        Meta m = service.criar(1L, new MetaUseCase.DadosMeta(" Viagem ", new BigDecimal("500"), hoje.plusDays(30)));
+        assertThat(m.usuarioId()).isEqualTo(1L);
+        assertThat(m.nome()).isEqualTo("Viagem");
+        assertThat(m.criadaEm()).isEqualTo(hoje);
+    }
+
+    @Test
+    void criarComDadosInvalidosNaoGrava() {
+        assertThatThrownBy(() -> service.criar(1L, new MetaUseCase.DadosMeta("x", BigDecimal.ZERO, hoje)))
+                .isInstanceOf(RegraNegocioException.class);
+        verify(repo, never()).salvar(any());
+    }
+
+    @Test
+    void listaMetasDoUsuario() {
+        when(repo.listar(1L)).thenReturn(List.of(metaExistente()));
+        assertThat(service.listar(1L)).hasSize(1);
+    }
+
+    @Test
+    void alteraMetaExistenteEGrava() {
+        when(repo.buscar(7L, 1L)).thenReturn(Optional.of(metaExistente()));
+        when(repo.salvar(any())).thenAnswer(i -> i.getArgument(0));
+        Meta m = service.alterar(1L, 7L, new MetaUseCase.DadosMeta("Nova", new BigDecimal("2000"), hoje.plusMonths(8)));
+        assertThat(m.nome()).isEqualTo("Nova");
+        assertThat(m.valorAlvo()).isEqualByComparingTo("2000");
+    }
+
+    @Test
+    void alterarMetaDeOutroUsuarioDa404() {
+        when(repo.buscar(7L, 2L)).thenReturn(Optional.empty());
+        assertThatThrownBy(() -> service.alterar(2L, 7L, new MetaUseCase.DadosMeta("x", BigDecimal.TEN, hoje)))
+                .isInstanceOf(NaoEncontradoException.class);
+        verify(repo, never()).salvar(any());
     }
 
     @Test

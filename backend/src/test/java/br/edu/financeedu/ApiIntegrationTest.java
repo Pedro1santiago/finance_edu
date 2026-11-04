@@ -13,7 +13,18 @@ import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
 
+import com.nimbusds.jose.jwk.source.ImmutableSecret;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
+import org.springframework.security.oauth2.jwt.JwsHeader;
+import org.springframework.security.oauth2.jwt.JwtClaimsSet;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
+
+import javax.crypto.spec.SecretKeySpec;
 import java.io.IOException;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -21,6 +32,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
@@ -80,6 +92,67 @@ class ApiIntegrationTest {
         mvc.perform(get("/api/metas").header("Authorization", "Bearer lixo"))
                 .andExpect(status().isUnauthorized())
                 .andExpect(jsonPath("$.detail").isString());
+    }
+
+    @Autowired
+    JwtEncoder encoder;
+
+    @Value("${app.jwt.secret}")
+    String segredo;
+
+    private String tokenCom(JwtEncoder enc, Instant emitido, Instant expira) {
+        var claims = JwtClaimsSet.builder().subject("1").issuedAt(emitido).expiresAt(expira).build();
+        return enc.encode(JwtEncoderParameters.from(JwsHeader.with(MacAlgorithm.HS256).build(), claims)).getTokenValue();
+    }
+
+    @Test
+    void loginCorretoMeETokensInvalidos() throws Exception {
+        String email = UUID.randomUUID() + "@teste.com";
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                .content("""
+                        {"nome":"Ana","email":"%s","senha":"senha12345"}""".formatted(email))).andExpect(status().isCreated());
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome":"Ana","email":"%s","senha":"senha12345"}""".formatted(email.toUpperCase())))
+                .andExpect(status().isUnprocessableContent());
+
+        String login = mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"%s","senha":"senha12345"}""".formatted(email)))
+                .andExpect(status().isOk())
+                .andReturn().getResponse().getContentAsString();
+        String token = JsonPath.read(login, "$.token");
+
+        mvc.perform(get("/api/me").header("Authorization", "Bearer " + token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.email").value(email));
+        mvc.perform(get("/api/me")).andExpect(status().isUnauthorized());
+
+        Instant agora = Instant.now();
+        String outraChave = tokenCom(new NimbusJwtEncoder(new ImmutableSecret<>(
+                new SecretKeySpec("outra-chave-outra-chave-outra-chave-123".getBytes(), "HmacSHA256"))), agora, agora.plusSeconds(3600));
+        String expirado = tokenCom(encoder, agora.minusSeconds(7200), agora.minusSeconds(3600));
+        int meio = token.indexOf('.') + 5;
+        String adulterado = token.substring(0, meio) + (token.charAt(meio) == 'A' ? 'B' : 'A') + token.substring(meio + 1);
+        for (String ruim : new String[]{outraChave, expirado, adulterado}) {
+            mvc.perform(get("/api/me").header("Authorization", "Bearer " + ruim)).andExpect(status().isUnauthorized());
+        }
+    }
+
+    @Test
+    void alteraMetaComPut() throws Exception {
+        String token = registrar();
+        String prazo = LocalDate.now().plusMonths(6).toString();
+        String meta = json(token, post("/api/metas"), """
+                {"nome":"Notebook","valorAlvo":1000,"prazo":"%s"}""".formatted(prazo), 201);
+        Integer id = JsonPath.read(meta, "$.id");
+
+        json(token, put("/api/metas/" + id), """
+                {"nome":"Notebook novo","valorAlvo":2000,"prazo":"%s"}""".formatted(prazo), 200);
+        mvc.perform(get("/api/metas/" + id).header("Authorization", token))
+                .andExpect(jsonPath("$.nome").value("Notebook novo"))
+                .andExpect(jsonPath("$.valorAlvo").value(2000));
+        json(token, put("/api/metas/" + id), """
+                {"nome":"x","valorAlvo":0,"prazo":"%s"}""".formatted(prazo), 422);
     }
 
     @Test
