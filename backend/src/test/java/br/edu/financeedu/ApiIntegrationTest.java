@@ -83,6 +83,19 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void historicoPreservaDecimaisSemNotacaoCientifica() throws Exception {
+        String token = registrar();
+        json(token, post("/api/simulacoes/juros-compostos"), """
+                {"capital":9999999999999.99,"taxaMensal":0,"meses":1}""", 200);
+        json(token, post("/api/simulacoes/juros-compostos"), """
+                {"capital":1000.50,"taxaMensal":1,"meses":12}""", 200);
+        String corpo = mvc.perform(get("/api/simulacoes").header("Authorization", token))
+                .andReturn().getResponse().getContentAsString();
+        org.assertj.core.api.Assertions.assertThat(corpo)
+                .contains("\"montante\":9999999999999.99", "\"capital\":9999999999999.99", "\"capital\":1000.50");
+    }
+
+    @Test
     void senhaComAcentosAcimaDe72BytesNaoDa500() throws Exception {
         String senha = "é".repeat(40);
         String email = UUID.randomUUID() + "@teste.com";

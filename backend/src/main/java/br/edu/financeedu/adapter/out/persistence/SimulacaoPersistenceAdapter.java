@@ -5,6 +5,7 @@ import br.edu.financeedu.domain.port.out.SimulacaoRepositoryPort;
 import org.springframework.data.domain.Limit;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Component;
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.json.JsonMapper;
 
 import java.util.List;
@@ -43,7 +44,8 @@ class SimulacaoPersistenceAdapter implements SimulacaoRepositoryPort {
     }
 
     private Simulacao paraDominio(SimulacaoEntity e) {
+        var leitor = json.readerFor(Map.class).with(DeserializationFeature.USE_BIG_DECIMAL_FOR_FLOATS);
         return new Simulacao(e.id, e.usuarioId, Simulacao.Tipo.valueOf(e.tipo),
-                json.readValue(e.parametros, Map.class), json.readValue(e.resultado, Map.class), e.criadaEm);
+                leitor.readValue(e.parametros), leitor.readValue(e.resultado), e.criadaEm);
     }
 }
