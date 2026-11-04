@@ -1,6 +1,7 @@
 package br.edu.financeedu.adapter.out.persistence;
 
 import br.edu.financeedu.domain.model.Aporte;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -17,6 +18,8 @@ class AporteEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     Long id;
+    // nome explícito para casar com o @JoinColumn de MetaEntity.aportes
+    @Column(name = "meta_id")
     Long metaId;
     BigDecimal valor;
     LocalDate data;

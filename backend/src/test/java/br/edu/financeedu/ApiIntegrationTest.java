@@ -1,17 +1,18 @@
 package br.edu.financeedu;
 
 import com.jayway.jsonpath.JsonPath;
+import io.zonky.test.db.postgres.embedded.EmbeddedPostgres;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.http.MediaType;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.test.web.servlet.MockMvc;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.postgresql.PostgreSQLContainer;
 
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.UUID;
 
@@ -24,12 +25,22 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 @SpringBootTest
 @AutoConfigureMockMvc
-@Testcontainers(disabledWithoutDocker = true)
 class ApiIntegrationTest {
 
-    @Container
-    @ServiceConnection
-    static PostgreSQLContainer postgres = new PostgreSQLContainer("postgres:17");
+    static EmbeddedPostgres postgres;
+
+    @DynamicPropertySource
+    static void banco(DynamicPropertyRegistry r) throws IOException {
+        postgres = EmbeddedPostgres.start();
+        r.add("spring.datasource.url", () -> postgres.getJdbcUrl("postgres", "postgres"));
+        r.add("spring.datasource.username", () -> "postgres");
+        r.add("spring.datasource.password", () -> "postgres");
+    }
+
+    @AfterAll
+    static void parar() throws IOException {
+        postgres.close();
+    }
 
     @Autowired
     MockMvc mvc;
@@ -79,7 +90,10 @@ class ApiIntegrationTest {
         mvc.perform(get("/api/metas/" + metaId).header("Authorization", token))
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.percentualAtingido").value(25.0))
-                .andExpect(jsonPath("$.status").value("ATIVA"));
+                .andExpect(jsonPath("$.status").value("ATIVA"))
+                .andExpect(jsonPath("$.prazo").value(prazo))
+                .andExpect(jsonPath("$.criadaEm").value(LocalDate.now().toString()))
+                .andExpect(jsonPath("$.estimativaConclusao").isString());
         mvc.perform(get("/api/metas/" + metaId + "/aportes").header("Authorization", token))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].id").value(aporteId));
@@ -90,12 +104,21 @@ class ApiIntegrationTest {
                 {"valor":1000,"taxaMensal":-1,"parcelas":12}""", 422);
         mvc.perform(get("/api/simulacoes").header("Authorization", token))
                 .andExpect(jsonPath("$", hasSize(1)))
-                .andExpect(jsonPath("$[0].resultado.montante").value(1126.83));
+                .andExpect(jsonPath("$[0].resultado.montante").value(1126.83))
+                .andExpect(jsonPath("$[0].tipo").value("JUROS_COMPOSTOS"))
+                .andExpect(jsonPath("$[0].criadaEm").isString());
 
         mvc.perform(get("/api/modulos").header("Authorization", token)).andExpect(jsonPath("$", hasSize(6)));
         json(token, post("/api/conteudos/1/concluir"), null, 204);
         json(token, post("/api/conteudos/1/concluir"), null, 204);
         json(token, post("/api/conteudos/9999/concluir"), null, 404);
+        mvc.perform(get("/api/modulos/1/conteudos").header("Authorization", token))
+                .andExpect(jsonPath("$[0].id").value(1))
+                .andExpect(jsonPath("$[0].concluido").value(true))
+                .andExpect(jsonPath("$[1].concluido").value(false));
+        mvc.perform(get("/api/progresso/conteudos").header("Authorization", token))
+                .andExpect(jsonPath("$[0].total").value(2))
+                .andExpect(jsonPath("$[0].percentual").value(50.0));
 
         mvc.perform(get("/api/dashboard").header("Authorization", token))
                 .andExpect(status().isOk())
@@ -105,6 +128,7 @@ class ApiIntegrationTest {
                 .andExpect(jsonPath("$.ultimasSimulacoes", hasSize(1)));
         mvc.perform(get("/api/dashboard/evolucao-aportes?meses=3").header("Authorization", token))
                 .andExpect(jsonPath("$", hasSize(3)))
+                .andExpect(jsonPath("$[2].mes").value(java.time.YearMonth.now().toString()))
                 .andExpect(jsonPath("$[2].total").value(250));
 
         json(token, delete("/api/metas/" + metaId), null, 204);

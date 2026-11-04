@@ -6,7 +6,7 @@ App de Educação Financeira · Front: Angular · Banco: PostgreSQL · Auth: ema
 - Java 25 + Spring Boot 4 (WebMVC, Data JPA, Security/OAuth2 Resource Server, Validation)
 - PostgreSQL 17 (docker-compose) + Flyway
 - springdoc-openapi (Swagger para integração com o Angular)
-- Testes: JUnit 5, Mockito, Testcontainers
+- Testes: JUnit 5, Mockito, embedded-postgres
 
 ## Estrutura de pacotes
 ```
@@ -104,7 +104,7 @@ br.edu.financeedu
 |---|------|
 | 6.1 | Testes unitários do domínio (`CalculadoraFinanceira`, `Meta`) |
 | 6.2 | Testes dos services com ports mockados (Mockito) |
-| 6.3 | Teste de integração com Testcontainers: fluxo register → login → meta → aporte → simulação → dashboard |
+| 6.3 | Teste de integração com Postgres embutido: fluxo register → login → meta → aporte → simulação → dashboard |
 | 6.4 | Teste de segurança: rota sem token 401, meta de outro usuário 404 |
 | 6.5 | README: como subir banco, rodar app e acessar Swagger |
 
