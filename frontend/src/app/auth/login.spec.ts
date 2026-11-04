@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
 import { Router, provideRouter } from '@angular/router';
-import { of, throwError } from 'rxjs';
+import { Subject, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Login } from './login';
 
@@ -58,6 +58,17 @@ describe('Login', () => {
     preencher('senha', '12345678');
     await enviar();
     expect(el.querySelector('[role=alert]')?.textContent).toContain('Não foi possível conectar');
+  });
+
+  it('duplo submit em voo envia uma vez e desabilita o botao', async () => {
+    const { el, preencher, enviar } = await montar();
+    login.mockReturnValue(new Subject());
+    preencher('email', 'a@a.com');
+    preencher('senha', '12345678');
+    await enviar();
+    await enviar();
+    expect(login).toHaveBeenCalledTimes(1);
+    expect(el.querySelector<HTMLButtonElement>('button[type=submit]')!.disabled).toBe(true);
   });
 
   it('form invalido nao chama o service', async () => {

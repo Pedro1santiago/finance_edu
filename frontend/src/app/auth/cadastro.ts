@@ -24,7 +24,7 @@ import { AuthService, mensagemErro } from './auth.service';
       @if (erro()) {
         <p role="alert">{{ erro() }}</p>
       }
-      <button type="submit">Cadastrar</button>
+      <button type="submit" [disabled]="enviando()">Cadastrar</button>
     </form>
     <p>Já tem conta? <a routerLink="/login">Entrar</a></p>
   `,
@@ -33,6 +33,7 @@ export class Cadastro {
   private auth = inject(AuthService);
   private router = inject(Router);
   erro = signal('');
+  enviando = signal(false);
   form = inject(FormBuilder).nonNullable.group({
     nome: ['', [Validators.required, Validators.pattern(/\S/), Validators.maxLength(120)]],
     email: ['', [Validators.required, Validators.email, Validators.maxLength(180)]],
@@ -41,9 +42,14 @@ export class Cadastro {
 
   enviar() {
     if (this.form.invalid) return this.form.markAllAsTouched();
+    if (this.enviando()) return;
+    this.enviando.set(true);
     this.auth.registrar(this.form.getRawValue()).subscribe({
       next: () => this.router.navigateByUrl('/dashboard'),
-      error: (e) => this.erro.set(mensagemErro(e)),
+      error: (e) => {
+        this.erro.set(mensagemErro(e));
+        this.enviando.set(false);
+      },
     });
   }
 }
