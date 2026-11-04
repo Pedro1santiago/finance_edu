@@ -8,14 +8,16 @@ Pré-requisitos: JDK 25 e Docker.
 
 ```bash
 docker compose up -d
-./mvnw spring-boot:run
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
 ```
+
+O profile `dev` traz os padrões locais (banco do compose e segredo JWT de desenvolvimento). Sem ele, `DB_URL`, `DB_USER`, `DB_PASSWORD` e `JWT_SECRET` são obrigatórios e a app não sobe sem eles (é o caso do Render e do Docker).
 
 - API: http://localhost:8080
 - Swagger: http://localhost:8080/swagger-ui.html
 - Banco: `localhost:5433` (usuário/senha/db `financeedu`)
 
-Variáveis de ambiente (todas com padrão de dev): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET` (mín. 32 caracteres), `CORS_ORIGENS`.
+Variáveis de ambiente (com padrão só no profile `dev`; `CORS_ORIGENS` sempre): `DB_URL`, `DB_USER`, `DB_PASSWORD`, `JWT_SECRET` (mín. 32 caracteres), `CORS_ORIGENS`.
 
 ## Testes
 
