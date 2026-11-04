@@ -39,7 +39,7 @@ export class FormMeta implements OnInit {
   enviando = signal(false);
   erro = signal('');
   form = new FormGroup({
-    nome: new FormControl('', { nonNullable: true, validators: Validators.required }),
+    nome: new FormControl('', { nonNullable: true, validators: [Validators.required, Validators.pattern(/\S/)] }),
     valorAlvo: new FormControl<number | null>(null, [Validators.required, positivo]),
     prazo: new FormControl('', { nonNullable: true, validators: [Validators.required, prazoFuturo] }),
   });

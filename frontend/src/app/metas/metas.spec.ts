@@ -155,6 +155,7 @@ describe('Metas', () => {
       ['prazo passado', { ...valido, prazo: '2000-01-01' }],
       ['valor zero', { ...valido, valorAlvo: '0' }],
       ['nome vazio', { ...valido, nome: '' }],
+      ['nome so espacos', { ...valido, nome: '   ' }],
     ])('invalido (%s) nao chama e limpa o erro anterior', async (_, valores) => {
       const { el, atualizar } = await montar([]);
       service.criar.mockReturnValue(throwError(() => erro422('falhou')));
