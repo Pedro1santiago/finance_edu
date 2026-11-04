@@ -1,6 +1,6 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { Router, RouterLink } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { AuthService, mensagemErro } from './auth.service';
 
 @Component({
@@ -28,6 +28,7 @@ import { AuthService, mensagemErro } from './auth.service';
 export class Login {
   private auth = inject(AuthService);
   private router = inject(Router);
+  private route = inject(ActivatedRoute);
   erro = signal('');
   enviando = signal(false);
   form = inject(FormBuilder).nonNullable.group({
@@ -35,12 +36,18 @@ export class Login {
     senha: ['', [Validators.required, Validators.minLength(8), Validators.maxLength(72)]],
   });
 
+  // so caminhos internos: evita open redirect
+  private destino() {
+    const url = this.route.snapshot.queryParamMap.get('returnUrl');
+    return url && /^\/(?![/\\])/.test(url) ? url : '/dashboard';
+  }
+
   enviar() {
     if (this.form.invalid) return this.form.markAllAsTouched();
     if (this.enviando()) return;
     this.enviando.set(true);
     this.auth.login(this.form.getRawValue()).subscribe({
-      next: () => this.router.navigateByUrl('/dashboard'),
+      next: () => this.router.navigateByUrl(this.destino()),
       error: (e) => {
         this.erro.set(mensagemErro(e));
         this.enviando.set(false);

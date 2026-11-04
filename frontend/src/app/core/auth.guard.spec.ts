@@ -9,15 +9,15 @@ describe('authGuard', () => {
     TestBed.configureTestingModule({ providers: [provideRouter([])] });
   });
 
-  const executar = () =>
+  const executar = (url = '/') =>
     TestBed.runInInjectionContext(() =>
-      authGuard(new ActivatedRouteSnapshot(), TestBed.inject(Router).routerState.snapshot),
+      authGuard(new ActivatedRouteSnapshot(), Object.assign(TestBed.inject(Router).routerState.snapshot, { url })),
     );
 
-  it('redireciona para /login sem token', () => {
-    const r = executar();
+  it('redireciona para /login com a url pedida em returnUrl sem token', () => {
+    const r = executar('/metas?x=1');
     expect(r).toBeInstanceOf(UrlTree);
-    if (r instanceof UrlTree) expect(TestBed.inject(Router).serializeUrl(r)).toBe('/login');
+    if (r instanceof UrlTree) expect(TestBed.inject(Router).serializeUrl(r)).toBe('/login?returnUrl=%2Fmetas%3Fx%3D1');
   });
 
   it('libera com token', () => {

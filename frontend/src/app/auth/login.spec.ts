@@ -1,6 +1,6 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { TestBed } from '@angular/core/testing';
-import { Router, provideRouter } from '@angular/router';
+import { ActivatedRoute, Router, convertToParamMap, provideRouter } from '@angular/router';
 import { Subject, of, throwError } from 'rxjs';
 import { AuthService } from './auth.service';
 import { Login } from './login';
@@ -8,11 +8,16 @@ import { Login } from './login';
 describe('Login', () => {
   const login = vi.fn();
 
-  const montar = async () => {
+  const montar = async (returnUrl?: string) => {
     login.mockReset();
+    const queryParamMap = convertToParamMap(returnUrl === undefined ? {} : { returnUrl });
     await TestBed.configureTestingModule({
       imports: [Login],
-      providers: [provideRouter([]), { provide: AuthService, useValue: { login } }],
+      providers: [
+        provideRouter([]),
+        { provide: AuthService, useValue: { login } },
+        { provide: ActivatedRoute, useValue: { snapshot: { queryParamMap } } },
+      ],
     }).compileComponents();
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
     const fixture = TestBed.createComponent(Login);
@@ -39,6 +44,22 @@ describe('Login', () => {
     await enviar();
     expect(login).toHaveBeenCalledWith({ email: 'a@a.com', senha: '12345678' });
     expect(navigate).toHaveBeenCalledWith('/dashboard');
+  });
+
+  it.each([
+    ['/metas', '/metas'],
+    ['/conteudos/modulos/2?x=1', '/conteudos/modulos/2?x=1'],
+    ['//evil.com', '/dashboard'],
+    ['/\\evil.com', '/dashboard'],
+    ['https://evil.com', '/dashboard'],
+    ['metas', '/dashboard'],
+  ])('returnUrl %s navega para %s apos o login', async (returnUrl, destino) => {
+    const { navigate, preencher, enviar } = await montar(returnUrl);
+    login.mockReturnValue(of({}));
+    preencher('email', 'a@a.com');
+    preencher('senha', '12345678');
+    await enviar();
+    expect(navigate).toHaveBeenCalledWith(destino);
   });
 
   it('erro mostra o detail e nao navega', async () => {
