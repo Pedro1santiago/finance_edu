@@ -43,7 +43,13 @@ describe('Economia', () => {
     expect(texto).toContain('R$ 1.200,00');
   });
 
-  it('economia mensal 0 mostra validacao e nao chama o service', async () => {
+  it('1 mes no singular', async () => {
+    const el = await montar({ objetivo: '100', economiaMensal: '100' }, of({ mesesNecessarios: 1, economiaAnual: 1200 }));
+    expect(el.textContent).toContain('Meses necessários: 1 mês');
+    expect(el.textContent).not.toContain('1 meses');
+  });
+
+  it('economia mensal 0mostra validacao e nao chama o service', async () => {
     const el = await montar({ ...valido, economiaMensal: '0' });
     expect(economia).not.toHaveBeenCalled();
     expect(el.querySelector('[role=alert]')).not.toBeNull();
