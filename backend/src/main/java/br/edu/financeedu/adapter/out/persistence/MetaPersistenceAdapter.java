@@ -1,5 +1,6 @@
 package br.edu.financeedu.adapter.out.persistence;
 
+import br.edu.financeedu.domain.exception.NaoEncontradoException;
 import br.edu.financeedu.domain.model.Aporte;
 import br.edu.financeedu.domain.model.Meta;
 import br.edu.financeedu.domain.port.out.MetaRepositoryPort;
@@ -25,8 +26,10 @@ class MetaPersistenceAdapter implements MetaRepositoryPort {
 
         // bulk delete: o banco remove os aportes via ON DELETE CASCADE
         @Modifying
-        @Query("delete from MetaEntity m where m.id = :id")
-        void excluir(Long id);
+        @Query("delete from MetaEntity m where m.id = :id and m.usuarioId = :usuarioId")
+        void excluir(Long id, Long usuarioId);
+
+        boolean existsByIdAndUsuarioId(Long id, Long usuarioId);
     }
 
     interface AporteRepo extends JpaRepository<AporteEntity, Long> {
@@ -43,13 +46,15 @@ class MetaPersistenceAdapter implements MetaRepositoryPort {
     @Override
     @Transactional
     public Meta salvar(Meta meta) {
-        MetaEntity e = meta.id() == null ? new MetaEntity() : repo.findById(meta.id()).orElseThrow();
+        MetaEntity e = meta.id() == null ? new MetaEntity() : repo.findByIdAndUsuarioId(meta.id(), meta.usuarioId())
+                .orElseThrow(() -> new NaoEncontradoException("Meta não encontrada"));
         e.copiar(meta);
         return repo.save(e).paraDominio();
     }
 
     @Override
-    public Aporte salvarAporte(Long metaId, Aporte aporte) {
+    public Aporte salvarAporte(Long usuarioId, Long metaId, Aporte aporte) {
+        if (!repo.existsByIdAndUsuarioId(metaId, usuarioId)) throw new NaoEncontradoException("Meta não encontrada");
         AporteEntity e = new AporteEntity();
         e.metaId = metaId;
         e.valor = aporte.valor();
@@ -71,7 +76,7 @@ class MetaPersistenceAdapter implements MetaRepositoryPort {
 
     @Override
     @Transactional
-    public void excluir(Long id) {
-        repo.excluir(id);
+    public void excluir(Long usuarioId, Long id) {
+        repo.excluir(id, usuarioId);
     }
 }

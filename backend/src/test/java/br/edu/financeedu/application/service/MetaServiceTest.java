@@ -40,13 +40,13 @@ class MetaServiceTest {
         when(repo.buscar(7L, 2L)).thenReturn(Optional.empty());
         assertThatThrownBy(() -> service.buscar(2L, 7L)).isInstanceOf(NaoEncontradoException.class);
         assertThatThrownBy(() -> service.excluir(2L, 7L)).isInstanceOf(NaoEncontradoException.class);
-        verify(repo, never()).excluir(any());
+        verify(repo, never()).excluir(any(), any());
     }
 
     @Test
     void aporteSemDataUsaHoje() {
         when(repo.buscar(7L, 1L)).thenReturn(Optional.of(metaExistente()));
-        when(repo.salvarAporte(eq(7L), any())).thenAnswer(i -> i.getArgument(1));
+        when(repo.salvarAporte(eq(1L), eq(7L), any())).thenAnswer(i -> i.getArgument(2));
         Aporte a = service.registrarAporte(1L, 7L, new BigDecimal("50"), null);
         assertThat(a.data()).isEqualTo(hoje);
     }
@@ -56,6 +56,6 @@ class MetaServiceTest {
         when(repo.buscar(7L, 1L)).thenReturn(Optional.of(metaExistente()));
         assertThatThrownBy(() -> service.registrarAporte(1L, 7L, new BigDecimal("-5"), hoje))
                 .isInstanceOf(RegraNegocioException.class);
-        verify(repo, never()).salvarAporte(any(), any());
+        verify(repo, never()).salvarAporte(any(), any(), any());
     }
 }
