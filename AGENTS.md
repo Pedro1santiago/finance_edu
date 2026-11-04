@@ -12,7 +12,7 @@ Backend (JDK 25 em `~/.jdks/graalvm-jdk-25`):
 ```bash
 cd backend && JAVA_HOME=~/.jdks/graalvm-jdk-25 sh ./mvnw -q verify
 ```
-Testes de integração usam Testcontainers e são pulados sem Docker.
+Testes de integração sobem um Postgres real embutido (zonky embedded-postgres), sem Docker.
 
 Frontend (Angular 21, Vitest; `npm start` sobe em `localhost:4200`):
 ```bash

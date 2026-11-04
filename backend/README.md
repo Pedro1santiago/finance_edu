@@ -23,7 +23,7 @@ Variáveis de ambiente (todas com padrão de dev): `DB_URL`, `DB_USER`, `DB_PASS
 ./mvnw verify
 ```
 
-Os testes de integração sobem um Postgres via Testcontainers (Docker precisa estar rodando).
+Os testes de integração sobem um Postgres real embutido (zonky embedded-postgres); não precisam de Docker.
 
 ## Arquitetura
 
