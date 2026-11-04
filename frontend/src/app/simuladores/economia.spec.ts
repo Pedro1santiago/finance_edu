@@ -49,7 +49,7 @@ describe('Economia', () => {
     expect(el.textContent).not.toContain('1 meses');
   });
 
-  it('economia mensal 0mostra validacao e nao chama o service', async () => {
+  it('economia mensal 0 mostra validacao e nao chama o service', async () => {
     const el = await montar({ ...valido, economiaMensal: '0' });
     expect(economia).not.toHaveBeenCalled();
     expect(el.querySelector('[role=alert]')).not.toBeNull();
