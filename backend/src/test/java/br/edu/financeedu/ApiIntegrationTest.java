@@ -21,6 +21,7 @@ import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.content;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.jsonPath;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
@@ -70,8 +71,32 @@ class ApiIntegrationTest {
     }
 
     @Test
-    void semTokenDa401() throws Exception {
-        mvc.perform(get("/api/metas")).andExpect(status().isUnauthorized());
+    void semTokenDa401ComProblemDetail() throws Exception {
+        mvc.perform(get("/api/metas"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(content().contentTypeCompatibleWith("application/problem+json"))
+                .andExpect(jsonPath("$.status").value(401))
+                .andExpect(jsonPath("$.detail").isString());
+        mvc.perform(get("/api/metas").header("Authorization", "Bearer lixo"))
+                .andExpect(status().isUnauthorized())
+                .andExpect(jsonPath("$.detail").isString());
+    }
+
+    @Test
+    void erroDeFrameworkVira400ComProblemDetail() throws Exception {
+        String token = registrar();
+        mvc.perform(post("/api/metas").header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON).content("{quebrado"))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").isString());
+        mvc.perform(post("/api/metas").header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"nome":"x","valorAlvo":"abc","prazo":"2999-01-01"}"""))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").isString());
+        mvc.perform(get("/api/metas/abc").header("Authorization", token))
+                .andExpect(status().isBadRequest())
+                .andExpect(jsonPath("$.detail").isString());
     }
 
     @Test
