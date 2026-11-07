@@ -28,6 +28,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.UUID;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.hamcrest.Matchers.hasSize;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -136,6 +137,24 @@ class ApiIntegrationTest {
         for (String ruim : new String[]{outraChave, expirado, adulterado}) {
             mvc.perform(get("/api/me").header("Authorization", "Bearer " + ruim)).andExpect(status().isUnauthorized());
         }
+    }
+
+    @Test
+    void achadosDoQaViramErro422ComMensagemClara() throws Exception {
+        String token = registrar();
+        json(token, post("/api/simulacoes/juros-compostos"), """
+                {"capital":1000,"taxaMensal":1000,"meses":1200}""", 422);
+        String parcelamento = json(token, post("/api/simulacoes/parcelamento"), """
+                {"valor":1000,"taxaMensal":0,"parcelas":12}""", 200);
+        assertThat(parcelamento).contains("\"totalPago\":1000.00", "\"totalJuros\":0.00");
+        String semPrazo = json(token, post("/api/metas"), """
+                {"nome":"x","valorAlvo":10}""", 422);
+        assertThat(semPrazo).contains("prazo é obrigatório");
+        String meta = json(token, post("/api/metas"), """
+                {"nome":"x","valorAlvo":10,"prazo":"%s"}""".formatted(LocalDate.now().plusDays(5)), 201);
+        Integer metaId = JsonPath.read(meta, "$.id");
+        json(token, post("/api/metas/" + metaId + "/aportes"), """
+                {"valor":1,"data":"%s"}""".formatted(LocalDate.now().plusDays(1)), 422);
     }
 
     @Test
