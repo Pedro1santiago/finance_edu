@@ -14,6 +14,8 @@ public final class CalculadoraFinanceira {
     private static final MathContext MC = MathContext.DECIMAL128;
     private static final BigDecimal CEM = BigDecimal.valueOf(100);
     private static final int MAX_MESES = 1200;
+    private static final BigDecimal MAX_VALOR = new BigDecimal("9999999999999.99");
+    private static final BigDecimal TAXA_MINIMA_PARCELAMENTO = new BigDecimal("0.0001");
 
     private CalculadoraFinanceira() {
     }
@@ -35,14 +37,15 @@ public final class CalculadoraFinanceira {
     }
 
     public record Economia(BigDecimal objetivo, BigDecimal economiaMensal, int mesesNecessarios,
-                           BigDecimal economiaAnual) {
+                           BigDecimal economiaAnual, BigDecimal valorMensalNecessario) {
     }
 
     public static JurosCompostos jurosCompostos(BigDecimal capital, BigDecimal taxaMensal, int meses) {
         positivo(capital, "capital");
-        naoNegativo(taxaMensal, "taxaMensal");
+        taxa(taxaMensal);
         prazo(meses);
         BigDecimal montante = capital.multiply(fator(taxaMensal).pow(meses, MC), MC);
+        teto(montante, "montante");
         return new JurosCompostos(capital, taxaMensal, meses, dinheiro(montante), dinheiro(montante.subtract(capital)));
     }
 
@@ -50,7 +53,7 @@ public final class CalculadoraFinanceira {
                                             BigDecimal taxaMensal, int meses) {
         naoNegativo(valorInicial, "valorInicial");
         naoNegativo(aporteMensal, "aporteMensal");
-        naoNegativo(taxaMensal, "taxaMensal");
+        taxa(taxaMensal);
         prazo(meses);
         BigDecimal fator = fator(taxaMensal);
         BigDecimal saldo = valorInicial;
@@ -60,6 +63,7 @@ public final class CalculadoraFinanceira {
             // aporte no fim do mês, após render
             saldo = saldo.multiply(fator, MC).add(aporteMensal);
             investido = investido.add(aporteMensal);
+            teto(saldo, "saldo");
             evolucao.add(new MesInvestimento(mes, dinheiro(saldo), dinheiro(investido), dinheiro(saldo.subtract(investido))));
         }
         return new Investimento(valorInicial, aporteMensal, taxaMensal, meses,
@@ -68,7 +72,10 @@ public final class CalculadoraFinanceira {
 
     public static Parcelamento parcelamento(BigDecimal valor, BigDecimal taxaMensal, int parcelas) {
         positivo(valor, "valor");
-        naoNegativo(taxaMensal, "taxaMensal");
+        taxa(taxaMensal);
+        if (taxaMensal.signum() > 0 && taxaMensal.compareTo(TAXA_MINIMA_PARCELAMENTO) < 0) {
+            throw new RegraNegocioException("taxaMensal deve ser zero ou ao menos " + TAXA_MINIMA_PARCELAMENTO.toPlainString());
+        }
         prazo(parcelas);
         BigDecimal parcela;
         if (taxaMensal.signum() == 0) {
@@ -78,16 +85,22 @@ public final class CalculadoraFinanceira {
             BigDecimal desconto = BigDecimal.ONE.subtract(BigDecimal.ONE.divide(fator(taxaMensal).pow(parcelas, MC), MC));
             parcela = valor.multiply(i, MC).divide(desconto, MC);
         }
-        BigDecimal parcelaArredondada = dinheiro(parcela);
-        BigDecimal total = parcelaArredondada.multiply(BigDecimal.valueOf(parcelas));
-        return new Parcelamento(valor, taxaMensal, parcelas, parcelaArredondada, total, total.subtract(valor));
+        BigDecimal total = dinheiro(parcela.multiply(BigDecimal.valueOf(parcelas), MC));
+        return new Parcelamento(valor, taxaMensal, parcelas, dinheiro(parcela), total, total.subtract(valor).max(BigDecimal.ZERO));
     }
 
-    public static Economia economia(BigDecimal objetivo, BigDecimal economiaMensal) {
+    public static Economia economia(BigDecimal objetivo, BigDecimal economiaMensal, Integer prazoMeses) {
         positivo(objetivo, "objetivo");
         positivo(economiaMensal, "economiaMensal");
-        int meses = objetivo.divide(economiaMensal, 0, RoundingMode.CEILING).intValueExact();
-        return new Economia(objetivo, economiaMensal, meses, dinheiro(economiaMensal.multiply(BigDecimal.valueOf(12))));
+        if (prazoMeses != null) prazo(prazoMeses);
+        if (objetivo.compareTo(economiaMensal.multiply(BigDecimal.valueOf(MAX_MESES))) > 0) {
+            throw new RegraNegocioException("objetivo exige mais de " + MAX_MESES + " meses de economia");
+        }
+        BigDecimal meses = objetivo.divide(economiaMensal, 0, RoundingMode.CEILING);
+        BigDecimal valorMensal = prazoMeses == null ? null
+                : objetivo.divide(BigDecimal.valueOf(prazoMeses), 2, RoundingMode.CEILING);
+        return new Economia(objetivo, economiaMensal, meses.intValue(),
+                dinheiro(economiaMensal.multiply(BigDecimal.valueOf(12))), valorMensal);
     }
 
     private static BigDecimal fator(BigDecimal taxaMensal) {
@@ -100,10 +113,20 @@ public final class CalculadoraFinanceira {
 
     private static void positivo(BigDecimal v, String campo) {
         if (v == null || v.signum() <= 0) throw new RegraNegocioException(campo + " deve ser maior que zero");
+        teto(v, campo);
     }
 
     private static void naoNegativo(BigDecimal v, String campo) {
         if (v == null || v.signum() < 0) throw new RegraNegocioException(campo + " não pode ser negativo");
+        teto(v, campo);
+    }
+
+    private static void teto(BigDecimal v, String campo) {
+        if (v.compareTo(MAX_VALOR) > 0) throw new RegraNegocioException(campo + " deve ser no máximo " + MAX_VALOR.toPlainString());
+    }
+
+    private static void taxa(BigDecimal v) {
+        if (v == null || v.signum() < 0 || v.compareTo(CEM) > 0) throw new RegraNegocioException("taxaMensal deve estar entre 0 e 100");
     }
 
     private static void prazo(int meses) {

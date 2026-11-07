@@ -10,11 +10,11 @@ public interface MetaRepositoryPort {
     /** Salva os dados da meta; aportes são gravados por {@link #salvarAporte}. */
     Meta salvar(Meta meta);
 
-    Aporte salvarAporte(Long metaId, Aporte aporte);
+    Aporte salvarAporte(Long usuarioId, Long metaId, Aporte aporte);
 
     Optional<Meta> buscar(Long id, Long usuarioId);
 
     List<Meta> listar(Long usuarioId);
 
-    void excluir(Long id);
+    void excluir(Long usuarioId, Long id);
 }

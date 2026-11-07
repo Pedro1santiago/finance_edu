@@ -13,6 +13,11 @@ public class Meta {
 
     public enum Status { ATIVA, CONCLUIDA }
 
+    private static final BigDecimal MAX_VALOR = new BigDecimal("9999999999999.99");
+    private static final int MAX_NOME = 120;
+    private static final int MAX_ANO = 9999;
+    private static final int MAX_MESES_ESTIMATIVA = 1200;
+
     private final Long id;
     private final Long usuarioId;
     private String nome;
@@ -40,16 +45,23 @@ public class Meta {
 
     public void alterar(String nome, BigDecimal valorAlvo, LocalDate prazo, LocalDate hoje) {
         if (nome == null || nome.isBlank()) throw new RegraNegocioException("nome é obrigatório");
-        if (valorAlvo == null || valorAlvo.signum() <= 0) throw new RegraNegocioException("valorAlvo deve ser maior que zero");
-        if (prazo == null || prazo.isBefore(hoje)) throw new RegraNegocioException("prazo não pode estar no passado");
+        if (nome.trim().length() > MAX_NOME) throw new RegraNegocioException("nome deve ter no máximo " + MAX_NOME + " caracteres");
+        Texto.semControle(nome, "nome");
+        dinheiro(valorAlvo, "valorAlvo");
+        if (prazo == null) throw new RegraNegocioException("prazo é obrigatório");
+        if (prazo.getYear() < 1) throw new RegraNegocioException("prazo deve ser a partir do ano 1");
+        if (prazo.getYear() > MAX_ANO) throw new RegraNegocioException("prazo deve ser até o ano " + MAX_ANO);
+        if (!prazo.equals(this.prazo) && prazo.isBefore(hoje)) throw new RegraNegocioException("prazo não pode estar no passado");
         this.nome = nome.trim();
         this.valorAlvo = valorAlvo;
         this.prazo = prazo;
     }
 
-    public Aporte registrarAporte(BigDecimal valor, LocalDate data) {
-        if (valor == null || valor.signum() <= 0) throw new RegraNegocioException("valor do aporte deve ser maior que zero");
+    public Aporte registrarAporte(BigDecimal valor, LocalDate data, LocalDate hoje) {
+        dinheiro(valor, "valor do aporte");
         if (data == null) throw new RegraNegocioException("data do aporte é obrigatória");
+        if (data.getYear() < 1) throw new RegraNegocioException("data do aporte deve ser a partir do ano 1");
+        if (data.isAfter(hoje)) throw new RegraNegocioException("data do aporte não pode estar no futuro");
         Aporte aporte = new Aporte(null, valor, data);
         aportes.add(aporte);
         return aporte;
@@ -72,14 +84,20 @@ public class Meta {
         return totalEconomizado().compareTo(valorAlvo) >= 0 ? Status.CONCLUIDA : Status.ATIVA;
     }
 
-    /** Projeta pela média mensal de aportes desde a criação; null se concluída ou sem aportes. */
+    /** Projeta pela média mensal de aportes desde a criação; null se concluída, sem aportes ou acima de 1200 meses. */
     public LocalDate estimativaConclusao(LocalDate hoje) {
         if (status() == Status.CONCLUIDA || aportes.isEmpty()) return null;
         long meses = Math.max(1, ChronoUnit.MONTHS.between(criadaEm, hoje) + 1);
-        BigDecimal mediaMensal = totalEconomizado().divide(BigDecimal.valueOf(meses), 2, RoundingMode.HALF_EVEN);
-        if (mediaMensal.signum() == 0) return null;
-        long mesesRestantes = valorRestante().divide(mediaMensal, 0, RoundingMode.CEILING).longValue();
-        return hoje.plusMonths(mesesRestantes);
+        BigDecimal mesesRestantes = valorRestante().multiply(BigDecimal.valueOf(meses))
+                .divide(totalEconomizado(), 0, RoundingMode.CEILING);
+        if (mesesRestantes.compareTo(BigDecimal.valueOf(MAX_MESES_ESTIMATIVA)) > 0) return null;
+        return hoje.plusMonths(mesesRestantes.longValue());
+    }
+
+    private static void dinheiro(BigDecimal v, String campo) {
+        if (v == null || v.signum() <= 0) throw new RegraNegocioException(campo + " deve ser maior que zero");
+        if (v.stripTrailingZeros().scale() > 2) throw new RegraNegocioException(campo + " deve ter no máximo 2 casas decimais");
+        if (v.compareTo(MAX_VALOR) > 0) throw new RegraNegocioException(campo + " deve ser no máximo " + MAX_VALOR.toPlainString());
     }
 
     public Long id() { return id; }

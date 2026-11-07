@@ -7,7 +7,7 @@ App de educação financeira: simuladores, metas, conteúdos e dashboard de apor
 Veja `AGENTS.md` (comandos de verificação) e `backend/README.md` (API, Swagger, testes).
 
 ```bash
-cd backend && docker compose up -d && ./mvnw spring-boot:run   # API em :8080
+cd backend && docker compose up -d && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API em :8080
 cd frontend && npm install && npm start                        # app em :4200
 ```
 

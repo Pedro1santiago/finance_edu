@@ -12,6 +12,7 @@ Backend (JDK 25 em `~/.jdks/graalvm-jdk-25`):
 ```bash
 cd backend && JAVA_HOME=~/.jdks/graalvm-jdk-25 sh ./mvnw -q verify
 ```
+Rodar a API local: `cd backend && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev` (ou `SPRING_PROFILES_ACTIVE=dev`); sem o profile `dev`, `JWT_SECRET` e `DB_*` são obrigatórios. Os testes de integração ativam `dev`.
 Testes de integração sobem um Postgres real embutido (zonky embedded-postgres), sem Docker.
 
 Frontend (Angular 21, Vitest; `npm start` sobe em `localhost:4200`):

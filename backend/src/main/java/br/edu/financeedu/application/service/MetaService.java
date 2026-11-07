@@ -46,12 +46,13 @@ public class MetaService implements MetaUseCase {
 
     @Override
     public void excluir(Long usuarioId, Long metaId) {
-        metas.excluir(buscar(usuarioId, metaId).id());
+        metas.excluir(usuarioId, buscar(usuarioId, metaId).id());
     }
 
     @Override
     public Aporte registrarAporte(Long usuarioId, Long metaId, BigDecimal valor, LocalDate data) {
         Meta meta = buscar(usuarioId, metaId);
-        return metas.salvarAporte(meta.id(), meta.registrarAporte(valor, data == null ? LocalDate.now(clock) : data));
+        LocalDate hoje = LocalDate.now(clock);
+        return metas.salvarAporte(usuarioId, meta.id(),meta.registrarAporte(valor, data == null ? hoje : data, hoje));
     }
 }
