@@ -45,6 +45,7 @@ public final class CalculadoraFinanceira {
         taxa(taxaMensal);
         prazo(meses);
         BigDecimal montante = capital.multiply(fator(taxaMensal).pow(meses, MC), MC);
+        teto(montante, "montante");
         return new JurosCompostos(capital, taxaMensal, meses, dinheiro(montante), dinheiro(montante.subtract(capital)));
     }
 
@@ -62,6 +63,7 @@ public final class CalculadoraFinanceira {
             // aporte no fim do mês, após render
             saldo = saldo.multiply(fator, MC).add(aporteMensal);
             investido = investido.add(aporteMensal);
+            teto(saldo, "saldo");
             evolucao.add(new MesInvestimento(mes, dinheiro(saldo), dinheiro(investido), dinheiro(saldo.subtract(investido))));
         }
         return new Investimento(valorInicial, aporteMensal, taxaMensal, meses,
@@ -91,10 +93,10 @@ public final class CalculadoraFinanceira {
         positivo(objetivo, "objetivo");
         positivo(economiaMensal, "economiaMensal");
         if (prazoMeses != null) prazo(prazoMeses);
-        BigDecimal meses = objetivo.divide(economiaMensal, 0, RoundingMode.CEILING);
-        if (meses.compareTo(BigDecimal.valueOf(MAX_MESES)) > 0) {
+        if (objetivo.compareTo(economiaMensal.multiply(BigDecimal.valueOf(MAX_MESES))) > 0) {
             throw new RegraNegocioException("objetivo exige mais de " + MAX_MESES + " meses de economia");
         }
+        BigDecimal meses = objetivo.divide(economiaMensal, 0, RoundingMode.CEILING);
         BigDecimal valorMensal = prazoMeses == null ? null
                 : objetivo.divide(BigDecimal.valueOf(prazoMeses), 2, RoundingMode.CEILING);
         return new Economia(objetivo, economiaMensal, meses.intValue(),

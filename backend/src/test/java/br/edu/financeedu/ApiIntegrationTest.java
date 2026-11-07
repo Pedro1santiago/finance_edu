@@ -188,6 +188,33 @@ class ApiIntegrationTest {
     }
 
     @Test
+    void caracterDeControleEDatasAbsurdasNaoDao500() throws Exception {
+        String token = registrar();
+        json(token, post("/api/metas"), """
+                {"nome":"a\\u0000b","valorAlvo":10,"prazo":"2999-01-01"}""", 422);
+        String meta = json(token, post("/api/metas"), """
+                {"nome":"ok","valorAlvo":9999999999999.99,"prazo":"2999-01-01"}""", 201);
+        Integer id = JsonPath.read(meta, "$.id");
+        json(token, post("/api/metas/" + id + "/aportes"), """
+                {"valor":0.01}""", 201);
+        mvc.perform(get("/api/metas/" + id).header("Authorization", token))
+                .andExpect(status().isOk()).andExpect(jsonPath("$.estimativaConclusao").doesNotExist());
+        mvc.perform(post("/api/metas/" + id + "/aportes").header("Authorization", token)
+                        .contentType(MediaType.APPLICATION_JSON).content("""
+                                {"valor":1,"data":"-5000-01-01"}"""))
+                .andExpect(status().is4xxClientError());
+
+        mvc.perform(post("/api/auth/register").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"nome":"An\\u0000a","email":"%s@teste.com","senha":"senha12345"}""".formatted(UUID.randomUUID())))
+                .andExpect(status().isUnprocessableContent());
+        mvc.perform(post("/api/auth/login").contentType(MediaType.APPLICATION_JSON)
+                        .content("""
+                                {"email":"a\\u0000b@teste.com","senha":"senha12345"}"""))
+                .andExpect(status().isUnauthorized());
+    }
+
+    @Test
     void senhaComAcentosAcimaDe72BytesNaoDa500() throws Exception {
         String senha = "é".repeat(40);
         String email = UUID.randomUUID() + "@teste.com";
@@ -262,6 +289,7 @@ class ApiIntegrationTest {
         mvc.perform(get("/api/simulacoes").header("Authorization", token))
                 .andExpect(jsonPath("$", hasSize(1)))
                 .andExpect(jsonPath("$[0].resultado.montante").value(1126.83))
+                .andExpect(jsonPath("$[0].parametros.capital").value(1000))
                 .andExpect(jsonPath("$[0].tipo").value("JUROS_COMPOSTOS"))
                 .andExpect(jsonPath("$[0].criadaEm").isString());
 

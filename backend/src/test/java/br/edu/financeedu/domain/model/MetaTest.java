@@ -101,6 +101,28 @@ class MetaTest {
     }
 
     @Test
+    void estimativaAcimaDe1200MesesNaoEstimaEmVezDeEstourar() {
+        Meta m = meta("9999999999999.99");
+        m.registrarAporte(new BigDecimal("0.01"), HOJE, HOJE);
+        assertThat(m.estimativaConclusao(HOJE)).isNull();
+    }
+
+    @Test
+    void datasAnterioresAoAno1SaoRejeitadas() {
+        LocalDate antigo = LocalDate.of(-5000, 1, 1);
+        assertThatThrownBy(() -> meta("10").registrarAporte(BigDecimal.TEN, antigo, HOJE))
+                .isInstanceOf(RegraNegocioException.class);
+        Meta m = new Meta(1L, 1L, "x", BigDecimal.TEN, antigo, HOJE, java.util.List.of());
+        assertThatThrownBy(() -> m.alterar("x", BigDecimal.TEN, antigo, HOJE)).isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void nomeNaoAceitaCaracterDeControle() {
+        assertThatThrownBy(() -> Meta.nova(1L, "a\u0000b", BigDecimal.TEN, HOJE, HOJE))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
     void estimativaNaoArredondaAMediaAntesDeDividir() {
         Meta m = meta("100");
         m.registrarAporte(new BigDecimal("10"), HOJE, HOJE);

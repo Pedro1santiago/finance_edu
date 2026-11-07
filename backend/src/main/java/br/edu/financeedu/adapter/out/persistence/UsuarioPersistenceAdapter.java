@@ -27,6 +27,7 @@ class UsuarioPersistenceAdapter implements UsuarioRepositoryPort {
         try {
             return repo.saveAndFlush(UsuarioEntity.de(usuario)).paraDominio();
         } catch (DataIntegrityViolationException e) {
+            if (!String.valueOf(e.getMostSpecificCause().getMessage()).contains("usuarios_email_key")) throw e;
             throw new RegraNegocioException("Email já cadastrado");
         }
     }

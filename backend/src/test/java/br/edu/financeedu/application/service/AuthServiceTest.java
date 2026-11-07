@@ -85,6 +85,22 @@ class AuthServiceTest {
     }
 
     @Test
+    void registroRejeitaCaracterDeControleNoNomeEEmail() {
+        assertThatThrownBy(() -> service.registrar("An\u0000a", "ana@x.com", "senha12345"))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> service.registrar("Ana", "an\u0000a@x.com", "senha12345"))
+                .isInstanceOf(RegraNegocioException.class);
+        verify(usuarios, never()).salvar(any());
+    }
+
+    @Test
+    void loginComCaracterDeControleNoEmailEhCredencialInvalida() {
+        assertThatThrownBy(() -> service.autenticar("an\u0000a@x.com", "senha12345"))
+                .isInstanceOf(CredenciaisInvalidasException.class);
+        verify(usuarios, never()).buscarPorEmail(anyString());
+    }
+
+    @Test
     void senhaErradaDa401() {
         when(usuarios.buscarPorEmail("ana@x.com")).thenReturn(Optional.of(new Usuario(1L, "Ana", "ana@x.com", "h", Instant.EPOCH)));
         when(hasher.confere("errada123", "h")).thenReturn(false);

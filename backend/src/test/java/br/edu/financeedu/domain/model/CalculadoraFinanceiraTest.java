@@ -111,6 +111,22 @@ class CalculadoraFinanceiraTest {
     }
 
     @Test
+    void montanteESaldoNaoPassamDoTeto() {
+        assertThatThrownBy(() -> CalculadoraFinanceira.jurosCompostos(bd(LIMITE), bd("100"), 1200))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.investimento(bd(LIMITE), bd("0"), bd("100"), 1200))
+                .isInstanceOf(RegraNegocioException.class);
+        assertThatThrownBy(() -> CalculadoraFinanceira.investimento(bd("0"), bd(LIMITE), bd("0"), 2))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
+    void economiaMensalMinusculaNaoConstroiBigDecimalGigante() {
+        assertThatThrownBy(() -> CalculadoraFinanceira.economia(bd("1000"), bd("1E-999999999"), null))
+                .isInstanceOf(RegraNegocioException.class);
+    }
+
+    @Test
     void parcelamentoComTaxaMinusculaNaoDividePorZero() {
         assertThatThrownBy(() -> CalculadoraFinanceira.parcelamento(bd("1000"), bd("0.0000000001"), 12))
                 .isInstanceOf(RegraNegocioException.class);

@@ -16,6 +16,7 @@ public class Meta {
     private static final BigDecimal MAX_VALOR = new BigDecimal("9999999999999.99");
     private static final int MAX_NOME = 120;
     private static final int MAX_ANO = 9999;
+    private static final int MAX_MESES_ESTIMATIVA = 1200;
 
     private final Long id;
     private final Long usuarioId;
@@ -45,8 +46,10 @@ public class Meta {
     public void alterar(String nome, BigDecimal valorAlvo, LocalDate prazo, LocalDate hoje) {
         if (nome == null || nome.isBlank()) throw new RegraNegocioException("nome é obrigatório");
         if (nome.trim().length() > MAX_NOME) throw new RegraNegocioException("nome deve ter no máximo " + MAX_NOME + " caracteres");
+        Texto.semControle(nome, "nome");
         dinheiro(valorAlvo, "valorAlvo");
         if (prazo == null) throw new RegraNegocioException("prazo é obrigatório");
+        if (prazo.getYear() < 1) throw new RegraNegocioException("prazo deve ser a partir do ano 1");
         if (prazo.getYear() > MAX_ANO) throw new RegraNegocioException("prazo deve ser até o ano " + MAX_ANO);
         if (!prazo.equals(this.prazo) && prazo.isBefore(hoje)) throw new RegraNegocioException("prazo não pode estar no passado");
         this.nome = nome.trim();
@@ -57,6 +60,7 @@ public class Meta {
     public Aporte registrarAporte(BigDecimal valor, LocalDate data, LocalDate hoje) {
         dinheiro(valor, "valor do aporte");
         if (data == null) throw new RegraNegocioException("data do aporte é obrigatória");
+        if (data.getYear() < 1) throw new RegraNegocioException("data do aporte deve ser a partir do ano 1");
         if (data.isAfter(hoje)) throw new RegraNegocioException("data do aporte não pode estar no futuro");
         Aporte aporte = new Aporte(null, valor, data);
         aportes.add(aporte);
@@ -80,13 +84,14 @@ public class Meta {
         return totalEconomizado().compareTo(valorAlvo) >= 0 ? Status.CONCLUIDA : Status.ATIVA;
     }
 
-    /** Projeta pela média mensal de aportes desde a criação; null se concluída ou sem aportes. */
+    /** Projeta pela média mensal de aportes desde a criação; null se concluída, sem aportes ou acima de 1200 meses. */
     public LocalDate estimativaConclusao(LocalDate hoje) {
         if (status() == Status.CONCLUIDA || aportes.isEmpty()) return null;
         long meses = Math.max(1, ChronoUnit.MONTHS.between(criadaEm, hoje) + 1);
-        long mesesRestantes = valorRestante().multiply(BigDecimal.valueOf(meses))
-                .divide(totalEconomizado(), 0, RoundingMode.CEILING).longValue();
-        return hoje.plusMonths(mesesRestantes);
+        BigDecimal mesesRestantes = valorRestante().multiply(BigDecimal.valueOf(meses))
+                .divide(totalEconomizado(), 0, RoundingMode.CEILING);
+        if (mesesRestantes.compareTo(BigDecimal.valueOf(MAX_MESES_ESTIMATIVA)) > 0) return null;
+        return hoje.plusMonths(mesesRestantes.longValue());
     }
 
     private static void dinheiro(BigDecimal v, String campo) {

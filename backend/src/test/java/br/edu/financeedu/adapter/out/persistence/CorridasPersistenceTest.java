@@ -21,12 +21,25 @@ class CorridasPersistenceTest {
     @Test
     void emailDuplicadoNaGravacaoVira422() {
         var repo = mock(UsuarioPersistenceAdapter.Repo.class);
-        when(repo.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("uk_usuarios_email"));
+        when(repo.saveAndFlush(any())).thenThrow(new DataIntegrityViolationException("x", new java.sql.SQLException(
+                "ERROR: duplicate key value violates unique constraint \"usuarios_email_key\"")));
         var adapter = new UsuarioPersistenceAdapter(repo);
 
         assertThatThrownBy(() -> adapter.salvar(new Usuario(null, "Ana", "a@b.com", "hash", Instant.EPOCH)))
                 .isInstanceOf(RegraNegocioException.class)
                 .hasMessage("Email já cadastrado");
+    }
+
+    @Test
+    void outraViolacaoDeIntegridadeNaoViraEmailDuplicado() {
+        var repo = mock(UsuarioPersistenceAdapter.Repo.class);
+        var violacao = new DataIntegrityViolationException("x",
+                new java.sql.SQLException("value too long for type character varying(120)"));
+        when(repo.saveAndFlush(any())).thenThrow(violacao);
+        var adapter = new UsuarioPersistenceAdapter(repo);
+
+        assertThatThrownBy(() -> adapter.salvar(new Usuario(null, "Ana", "a@b.com", "hash", Instant.EPOCH)))
+                .isSameAs(violacao);
     }
 
     @Test
