@@ -17,7 +17,7 @@ const tituloDe = (url: string) => titulos[url.split(/[/?#]/)[1]] ?? 'FinanceEdu'
   imports: [RouterLink, RouterLinkActive, RouterOutlet],
   template: `
     <div class="app-shell">
-      <aside class="sidebar" [class.open]="menuAberto()">
+      <aside id="menu-lateral" class="sidebar" [class.open]="menuAberto()">
         <div class="brand">
           <div class="brand-mark">F</div>
           <div class="brand-name">Finance<span>Edu</span></div>
@@ -42,7 +42,7 @@ const tituloDe = (url: string) => titulos[url.split(/[/?#]/)[1]] ?? 'FinanceEdu'
       </aside>
       <div class="main-area">
         <header class="topbar">
-          <button type="button" class="mobile-menu" aria-label="Abrir menu" [attr.aria-expanded]="menuAberto()" (click)="menuAberto.set(!menuAberto())">☰</button>
+          <button type="button" class="mobile-menu" aria-label="Abrir menu" aria-controls="menu-lateral" [attr.aria-expanded]="menuAberto()" (click)="menuAberto.set(!menuAberto())">☰</button>
           <div class="breadcrumb"><span>FinanceEdu</span><span class="crumb-divider">/</span><strong>{{ titulo() }}</strong></div>
           <div class="topbar-right"><span class="today-label">{{ hoje }}</span></div>
         </header>

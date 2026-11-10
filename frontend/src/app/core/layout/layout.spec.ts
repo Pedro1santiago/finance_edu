@@ -62,6 +62,8 @@ describe('Layout', () => {
     const botao = el.querySelector<HTMLButtonElement>('.mobile-menu')!;
     const sidebar = el.querySelector('.sidebar')!;
     expect(botao.getAttribute('aria-label')).toBeTruthy();
+    expect(sidebar.id).toBeTruthy();
+    expect(botao.getAttribute('aria-controls')).toBe(sidebar.id);
     expect(botao.getAttribute('aria-expanded')).toBe('false');
     expect(sidebar.classList.contains('open')).toBe(false);
     botao.click();
