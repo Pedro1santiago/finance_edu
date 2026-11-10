@@ -13,6 +13,13 @@ interface Resposta {
   token: string;
 }
 
+export interface Perfil {
+  id: number;
+  nome: string;
+  email: string;
+  criadoEm: string;
+}
+
 @Injectable({ providedIn: 'root' })
 export class AuthService {
   private http = inject(HttpClient);
@@ -24,6 +31,10 @@ export class AuthService {
 
   registrar(dados: { nome: string; email: string; senha: string }) {
     return this.enviar('register', dados);
+  }
+
+  me() {
+    return this.http.get<Perfil>(`${environment.apiUrl}/api/me`);
   }
 
   sair() {
