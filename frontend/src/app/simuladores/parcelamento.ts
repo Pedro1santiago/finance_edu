@@ -24,7 +24,7 @@ export class Parcelamento {
   estado = new Estado(
     [
       { nome: 'valor', rotulo: 'Valor', unidade: 'R$', validadores: [positivo] },
-      { nome: 'taxaMensal', rotulo: 'Taxa mensal', unidade: '%', validadores: naoNegativo },
+      { nome: 'taxaMensal', rotulo: 'Taxa mensal', mensagem: 'Taxa mensal (%)', unidade: '%', validadores: naoNegativo },
       { nome: 'parcelas', rotulo: 'Parcelas', unidade: 'x', validadores: prazo },
     ],
     (v) => this.api.parcelamento(v),

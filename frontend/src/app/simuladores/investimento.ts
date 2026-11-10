@@ -33,8 +33,8 @@ export class Investimento {
     [
       { nome: 'valorInicial', rotulo: 'Valor inicial', unidade: 'R$', validadores: naoNegativo },
       { nome: 'aporteMensal', rotulo: 'Aporte mensal', unidade: 'R$', validadores: naoNegativo },
-      { nome: 'taxaMensal', rotulo: 'Taxa mensal', unidade: '%', validadores: naoNegativo },
-      { nome: 'meses', rotulo: 'Prazo', unidade: 'meses', validadores: prazo },
+      { nome: 'taxaMensal', rotulo: 'Taxa mensal', mensagem: 'Taxa mensal (%)', unidade: '%', validadores: naoNegativo },
+      { nome: 'meses', rotulo: 'Prazo', mensagem: 'Prazo (meses)', unidade: 'meses', validadores: prazo },
     ],
     (v) => this.api.investimento(v),
   );

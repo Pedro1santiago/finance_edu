@@ -23,8 +23,8 @@ export class Juros {
   estado = new Estado(
     [
       { nome: 'capital', rotulo: 'Capital', unidade: 'R$', validadores: [positivo] },
-      { nome: 'taxaMensal', rotulo: 'Taxa mensal', unidade: '%', validadores: naoNegativo },
-      { nome: 'meses', rotulo: 'Prazo', unidade: 'meses', validadores: prazo },
+      { nome: 'taxaMensal', rotulo: 'Taxa mensal', mensagem: 'Taxa mensal (%)', unidade: '%', validadores: naoNegativo },
+      { nome: 'meses', rotulo: 'Prazo', mensagem: 'Prazo (meses)', unidade: 'meses', validadores: prazo },
     ],
     (v) => this.api.jurosCompostos(v),
   );

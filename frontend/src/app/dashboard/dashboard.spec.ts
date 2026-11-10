@@ -48,6 +48,12 @@ describe('Dashboard', () => {
   const stat = (el: HTMLElement, nome: string) =>
     Array.from(el.querySelectorAll('.dash-stat')).find((s) => s.querySelector('.stat-caption')?.textContent?.trim() === nome)?.textContent ?? '';
 
+  const valor = (el: HTMLElement, nome: string) =>
+    Array.from(el.querySelectorAll('.dash-stat'))
+      .find((s) => s.querySelector('.stat-caption')?.textContent?.trim() === nome)
+      ?.querySelector('strong')
+      ?.textContent?.trim();
+
   const atualizar = async (fixture: Awaited<ReturnType<typeof abrir>>) => {
     fixture.detectChanges();
     await fixture.whenStable();
@@ -88,10 +94,10 @@ describe('Dashboard', () => {
     aportes.complete();
     const el = await atualizar(fixture);
     expect(stat(el, 'Total economizado')).toMatch(/R\$\s0,00/);
-    expect(stat(el, 'Metas ativas')).toContain('0');
-    expect(stat(el, 'Metas concluídas')).toContain('0');
+    expect(valor(el, 'Metas ativas')).toBe('0');
+    expect(valor(el, 'Metas concluídas')).toBe('0');
     expect(stat(el, 'Metas ativas')).toContain('Progresso médio: 0%');
-    expect(stat(el, 'Conteúdos concluídos')).toContain('0%');
+    expect(valor(el, 'Conteúdos concluídos')).toBe('0%');
     expect(el.textContent).toContain('Nenhum aporte nos últimos 12 meses');
     expect(el.textContent).toContain('Nenhuma simulação ainda');
     expect(el.querySelector('a[href="/simuladores"]')).not.toBeNull();
@@ -114,10 +120,10 @@ describe('Dashboard', () => {
     const texto = el.textContent!;
     expect(texto).not.toContain('Carregando…');
     expect(stat(el, 'Total economizado')).toMatch(/R\$\s1\.500,50/);
-    expect(stat(el, 'Metas ativas')).toContain('2');
-    expect(stat(el, 'Metas concluídas')).toContain('1');
+    expect(valor(el, 'Metas ativas')).toBe('2');
+    expect(valor(el, 'Metas concluídas')).toBe('1');
     expect(stat(el, 'Metas ativas')).toContain('Progresso médio: 42,5%');
-    expect(stat(el, 'Conteúdos concluídos')).toContain('50%');
+    expect(valor(el, 'Conteúdos concluídos')).toBe('50%');
     expect(texto).toContain('Orcamento');
     expect(texto).toContain('1 de 2');
     const barra = el.querySelector('.dashboard-goal-progress')!;

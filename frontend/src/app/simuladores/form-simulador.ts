@@ -6,6 +6,7 @@ import { mensagemErro } from '../auth/auth.service';
 interface Campo<K extends string> {
   nome: K;
   rotulo: string;
+  mensagem?: string;
   unidade?: string;
   validadores: ValidatorFn[];
 }
@@ -36,7 +37,7 @@ const preenchido = <K extends string>(v: Record<string, number | null>): v is Re
                 </span>
               </label>
               @if (e.form.controls[c.nome].touched && e.form.controls[c.nome].invalid) {
-                <p role="alert">{{ c.rotulo }} inválido.</p>
+                <p role="alert">{{ c.mensagem ?? c.rotulo }} inválido.</p>
               }
             </div>
           }

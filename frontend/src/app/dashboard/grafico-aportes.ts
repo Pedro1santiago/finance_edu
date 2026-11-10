@@ -6,7 +6,7 @@ const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'o
 
 const cor = (variavel: string) => getComputedStyle(document.documentElement).getPropertyValue(variavel).trim();
 
-const rotulo =(mes: string) => {
+const rotulo = (mes: string) => {
   const [ano, numero] = mes.split('-');
   return `${meses[Number(numero) - 1]}/${ano.slice(2)}`;
 };

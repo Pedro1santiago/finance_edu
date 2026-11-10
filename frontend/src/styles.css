@@ -153,7 +153,7 @@ h1 span { color: var(--purple); }
 .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
 .form-field { display: grid; gap: 7px; color: #626579; font-size: 10px; font-weight: 600; margin-bottom: 15px; }
 .input-wrap, .text-input { height: 40px; display: flex; align-items: center; gap: 8px; border: 1px solid #e8e9f0; border-radius: 7px; padding: 0 10px; background: #fff; color: #73768a; }
-.input-wrap:focus-within, .text-input:focus { outline: 2px solid #e4e0ff; border-color: #a9a0f0; }
+.input-wrap:focus-within, .text-input:focus { outline: 2px solid var(--purple); border-color: var(--purple); }
 .input-wrap b { color: #999bae; font-weight: 500; font-size: 10px; white-space: nowrap; }
 .input-wrap input { width: 100%; min-width: 0; border: 0; outline: none; background: transparent; color: #34364d; font-size: 12px; font-weight: 600; }
 .form-note { display: flex; gap: 7px; color: #9294a5; font-size: 9px; line-height: 1.6; margin: 1px 0 15px; }
@@ -209,7 +209,6 @@ body.modal-open { overflow: hidden; }
 
 [role="alert"], .erro { color: var(--danger); font-size: 12px; font-weight: 600; }
 :focus-visible { outline: 2px solid var(--purple); outline-offset: 2px; }
-.input-wrap input:focus-visible, .text-input:focus-visible { outline: none; }
 .page-content { overflow-wrap: anywhere; }
 .nav-link, .brand-name, .breadcrumb, .topbar { overflow-wrap: normal; word-break: keep-all; }
 .grafico { position: relative; height: 320px; max-height: 320px; }
