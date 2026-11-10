@@ -10,19 +10,25 @@ const naoEncontrado = 'Conteúdo não encontrado';
   selector: 'app-conteudo-leitura',
   imports: [RouterLink],
   template: `
-    <a [routerLink]="conteudo() ? ['/conteudos/modulos', conteudo()!.moduloId] : '/conteudos'">Voltar</a>
+    <a class="text-link" [routerLink]="conteudo() ? ['/conteudos/modulos', conteudo()!.moduloId] : '/conteudos'">Voltar</a>
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }
     @if (conteudo(); as c) {
-      <h2>{{ c.titulo }}</h2>
-      <p>{{ c.corpo }}</p>
-      @if (c.concluido) {
-        <p>Concluído</p>
-      } @else {
-        <button type="button" [disabled]="enviando()" (click)="concluir()">Marcar como concluído</button>
-      }
+      <article class="lesson-card leitura">
+        <h2>{{ c.titulo }}</h2>
+        <p>{{ c.corpo }}</p>
+        @if (c.concluido) {
+          <span class="goal-percent">Concluído</span>
+        } @else {
+          <button type="button" class="button button-primary" [disabled]="enviando()" (click)="concluir()">Marcar como concluído</button>
+        }
+      </article>
     }
+  `,
+  styles: `
+    .leitura { margin-top: 13px; white-space: pre-line; }
+    .leitura .button { white-space: nowrap; }
   `,
 })
 export class ConteudoLeitura {

@@ -11,23 +11,27 @@ const naoEncontrado = 'Módulo não encontrado';
   selector: 'app-modulo-detalhe',
   imports: [RouterLink],
   template: `
-    <a routerLink="/conteudos">Voltar</a>
+    <a class="text-link" routerLink="/conteudos">Voltar</a>
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }
     @if (titulo()) {
-      <h2>{{ titulo() }}</h2>
-      <ul>
+      <div class="page-intro"><h2>{{ titulo() }}</h2></div>
+      <ul class="lista">
         @for (c of conteudos(); track c.id) {
-          <li>
+          <li class="lesson-card">
             <a [routerLink]="['/conteudos', c.id]">{{ c.titulo }}</a>
             @if (c.concluido) {
-              <span>Concluído</span>
+              <span class="goal-percent">Concluído</span>
             }
           </li>
         }
       </ul>
     }
+  `,
+  styles: `
+    .lista { list-style: none; margin: 0; padding: 0; display: grid; gap: 13px; }
+    .lista li { display: flex; justify-content: space-between; gap: 12px; align-items: center; font-weight: 600; }
   `,
 })
 export class ModuloDetalhe {
