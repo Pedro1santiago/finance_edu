@@ -26,7 +26,8 @@ describe('GraficoAportes', () => {
       expect.anything(),
       expect.objectContaining({
         type: 'bar',
-        data: { labels: ['jan/26', 'fev/26', 'mar/26'], datasets: [{ label: 'Aportes', data: [0, 150, 20] }] },
+        data: { labels: ['jan/26', 'fev/26', 'mar/26'], datasets: [{ label: 'Aportes', data: [0, 150, 20], backgroundColor: expect.any(String) }] },
+        options: expect.objectContaining({ maintainAspectRatio: false }),
       }),
     );
   });

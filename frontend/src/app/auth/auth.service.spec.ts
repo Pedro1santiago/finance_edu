@@ -31,6 +31,34 @@ describe('AuthService', () => {
     expect(lerToken()).toBe('tk2');
   });
 
+  describe('me', () => {
+    const url = `${environment.apiUrl}/api/me`;
+    const perfil = { id: 1, nome: 'Ana', email: 'a@a.com', criadoEm: '' };
+
+    it('varias assinaturas fazem uma unica requisicao', () => {
+      const nomes: string[] = [];
+      service.me().subscribe((p) => nomes.push(p.nome));
+      service.me().subscribe((p) => nomes.push(p.nome));
+      ctrl.expectOne(url).flush(perfil);
+      service.me().subscribe((p) => nomes.push(p.nome));
+      ctrl.expectNone(url);
+      expect(nomes).toEqual(['Ana', 'Ana', 'Ana']);
+    });
+
+    it('sair e novo login descartam o cache', () => {
+      vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);
+      service.me().subscribe();
+      ctrl.expectOne(url).flush(perfil);
+      service.sair();
+      service.me().subscribe();
+      ctrl.expectOne(url).flush(perfil);
+      service.login({ email: 'a@a.com', senha: '12345678' }).subscribe();
+      ctrl.expectOne(`${environment.apiUrl}/api/auth/login`).flush({ token: 't' });
+      service.me().subscribe();
+      ctrl.expectOne(url).flush(perfil);
+    });
+  });
+
   it('sair remove o token e navega para /login', () => {
     gravarToken('x');
     const navigate = vi.spyOn(TestBed.inject(Router), 'navigateByUrl').mockResolvedValue(true);

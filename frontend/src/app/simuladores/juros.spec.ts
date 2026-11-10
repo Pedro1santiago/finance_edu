@@ -59,6 +59,16 @@ describe('Juros', () => {
     expect(el.querySelector('[role=alert]')).not.toBeNull();
   });
 
+  it('mensagens de validacao mantem as unidades', async () => {
+    const { el, preencher, enviar, valido } = await montar();
+    valido();
+    preencher('taxaMensal', '-1');
+    preencher('meses', '0');
+    await enviar();
+    const msgs = [...el.querySelectorAll('[role=alert]')].map((a) => a.textContent?.trim());
+    expect(msgs).toEqual(['Taxa mensal (%) inválido.', 'Prazo (meses) inválido.']);
+  });
+
   it('duplo submit faz uma requisicao e desabilita o botao ate a resposta', async () => {
     const { el, fixture, enviar, valido } = await montar();
     const resposta = new Subject();

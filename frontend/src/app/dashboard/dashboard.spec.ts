@@ -5,6 +5,7 @@ import { TestBed } from '@angular/core/testing';
 import { provideRouter } from '@angular/router';
 import { HttpErrorResponse } from '@angular/common/http';
 import { Subject, of, throwError } from 'rxjs';
+import { AuthService } from '../auth/auth.service';
 import { Dashboard } from './dashboard';
 import { Dashboard as Dados, DashboardService } from './dashboard.service';
 
@@ -37,12 +38,21 @@ describe('Dashboard', () => {
     service.evolucaoAportes.mockReturnValue(aportes);
     await TestBed.configureTestingModule({
       imports: [Dashboard],
-      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: DashboardService, useValue: service }],
+      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: DashboardService, useValue: service }, { provide: AuthService, useValue: { me: () => of({ id: 1, nome: 'Ana Souza', email: 'a@b.c', criadoEm: '' }) } }],
     }).compileComponents();
     const fixture = TestBed.createComponent(Dashboard);
     await fixture.whenStable();
     return fixture;
   };
+
+  const stat = (el: HTMLElement, nome: string) =>
+    Array.from(el.querySelectorAll('.dash-stat')).find((s) => s.querySelector('.stat-caption')?.textContent?.trim() === nome)?.textContent ?? '';
+
+  const valor = (el: HTMLElement, nome: string) =>
+    Array.from(el.querySelectorAll('.dash-stat'))
+      .find((s) => s.querySelector('.stat-caption')?.textContent?.trim() === nome)
+      ?.querySelector('strong')
+      ?.textContent?.trim();
 
   const atualizar = async (fixture: Awaited<ReturnType<typeof abrir>>) => {
     fixture.detectChanges();
@@ -62,7 +72,7 @@ describe('Dashboard', () => {
     service.evolucaoAportes.mockReturnValueOnce(of([]));
     await TestBed.configureTestingModule({
       imports: [Dashboard],
-      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: DashboardService, useValue: service }],
+      providers: [provideRouter([]), { provide: LOCALE_ID, useValue: 'pt-BR' }, { provide: DashboardService, useValue: service }, { provide: AuthService, useValue: { me: () => of({ id: 1, nome: 'Ana Souza', email: 'a@b.c', criadoEm: '' }) } }],
     }).compileComponents();
     const fixture = TestBed.createComponent(Dashboard);
     const el = await atualizar(fixture);
@@ -83,10 +93,11 @@ describe('Dashboard', () => {
     aportes.next([]);
     aportes.complete();
     const el = await atualizar(fixture);
-    expect(el.textContent).toMatch(/Total economizado: R\$\s0,00/);
-    expect(el.textContent).toContain('Metas ativas: 0 · Metas concluídas: 0');
-    expect(el.textContent).toContain('Progresso médio das metas: 0%');
-    expect(el.textContent).toContain('Conteúdos concluídos: 0%');
+    expect(stat(el, 'Total economizado')).toMatch(/R\$\s0,00/);
+    expect(valor(el, 'Metas ativas')).toBe('0');
+    expect(valor(el, 'Metas concluídas')).toBe('0');
+    expect(stat(el, 'Metas ativas')).toContain('Progresso médio: 0%');
+    expect(valor(el, 'Conteúdos concluídos')).toBe('0%');
     expect(el.textContent).toContain('Nenhum aporte nos últimos 12 meses');
     expect(el.textContent).toContain('Nenhuma simulação ainda');
     expect(el.querySelector('a[href="/simuladores"]')).not.toBeNull();
@@ -108,13 +119,16 @@ describe('Dashboard', () => {
     expect(el.querySelector('canvas')).not.toBeNull();
     const texto = el.textContent!;
     expect(texto).not.toContain('Carregando…');
-    expect(texto).toMatch(/Total economizado: R\$\s1\.500,50/);
-    expect(texto).toContain('Metas ativas: 2 · Metas concluídas: 1');
-    expect(texto).toContain('Progresso médio das metas: 42,5%');
-    expect(texto).toContain('Conteúdos concluídos: 50%');
+    expect(stat(el, 'Total economizado')).toMatch(/R\$\s1\.500,50/);
+    expect(valor(el, 'Metas ativas')).toBe('2');
+    expect(valor(el, 'Metas concluídas')).toBe('1');
+    expect(stat(el, 'Metas ativas')).toContain('Progresso médio: 42,5%');
+    expect(valor(el, 'Conteúdos concluídos')).toBe('50%');
     expect(texto).toContain('Orcamento');
     expect(texto).toContain('1 de 2');
-    expect(el.querySelector('progress')!.value).toBe(50);
+    const barra = el.querySelector('.dashboard-goal-progress')!;
+    expect(barra.getAttribute('aria-valuenow')).toBe('50');
+    expect(barra.querySelector('i')!.style.width).toBe('50%');
     expect(texto).toContain('Juros compostos');
     expect(texto).toContain('05/03/2026');
   });

@@ -2,6 +2,8 @@ import { Component, DestroyRef, effect, ElementRef, inject, input, viewChild } f
 import { Chart } from 'chart.js/auto';
 import { PontoEvolucao } from './simulacao.service';
 
+const cor = (variavel: string) => getComputedStyle(document.documentElement).getPropertyValue(variavel).trim();
+
 @Component({
   selector: 'app-grafico-evolucao',
   template: `<canvas #canvas></canvas>`,
@@ -21,10 +23,11 @@ export class GraficoEvolucao {
         data: {
           labels: pontos.map((p) => p.mes),
           datasets: [
-            { label: 'Saldo', data: pontos.map((p) => p.saldo) },
-            { label: 'Total investido', data: pontos.map((p) => p.totalInvestido) },
+            { label: 'Saldo', data: pontos.map((p) => p.saldo), borderColor: cor('--purple') },
+            { label: 'Total investido', data: pontos.map((p) => p.totalInvestido), borderColor: cor('--green') },
           ],
         },
+        options: { maintainAspectRatio: false },
       });
     });
   }

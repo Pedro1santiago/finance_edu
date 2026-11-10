@@ -46,8 +46,10 @@ describe('Modulos', () => {
     expect(texto).toContain('Controle seus gastos');
     expect(texto).toContain('1 de 2 concluídos');
     expect(texto).toContain('50%');
-    expect(el.querySelectorAll('progress').length).toBe(2);
-    expect(el.querySelector('progress')!.value).toBe(50);
+    expect(el.querySelectorAll('.goal-progress[role=progressbar]').length).toBe(2);
+    const barra = el.querySelector('.goal-progress')!;
+    expect(barra.getAttribute('aria-valuenow')).toBe('50');
+    expect(barra.querySelector('i')!.style.width).toBe('50%');
     expect(el.querySelector('a')!.getAttribute('href')).toBe('/conteudos/modulos/1');
   });
 

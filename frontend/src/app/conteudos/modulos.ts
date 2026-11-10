@@ -9,27 +9,35 @@ import { ConteudoService, Modulo, ProgressoModulo } from './conteudo.service';
   selector: 'app-modulos',
   imports: [DecimalPipe, RouterLink],
   template: `
-    <h2>Conteúdos</h2>
+    <div class="page-intro">
+      <h1>Conteúdos</h1>
+      <p class="page-lead">Aprenda no seu ritmo, módulo a módulo.</p>
+    </div>
     @if (carregando()) {
-      <p>Carregando…</p>
+      <p class="page-lead">Carregando…</p>
     }
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }
-    @for (m of modulos(); track m.id) {
-      <article>
-        <h3><a [routerLink]="['/conteudos/modulos', m.id]">{{ m.titulo }}</a></h3>
-        <p>{{ m.descricao }}</p>
-        @if (progresso()[m.id]; as p) {
-          <progress max="100" [value]="p.percentual"></progress>
-          <p>{{ p.concluidos }} de {{ p.total }} concluídos · {{ p.percentual | number: '1.0-2' }}%</p>
+    <div class="lesson-grid">
+      @for (m of modulos(); track m.id) {
+        <article class="lesson-card">
+          <div class="lesson-top"><span class="lesson-icon lilac" aria-hidden="true">▤</span></div>
+          <h3><a [routerLink]="['/conteudos/modulos', m.id]">{{ m.titulo }}</a></h3>
+          <p>{{ m.descricao }}</p>
+          @if (progresso()[m.id]; as p) {
+            <div class="goal-progress" role="progressbar" [attr.aria-label]="m.titulo" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="p.percentual">
+              <i [style.width.%]="p.percentual"></i>
+            </div>
+            <p class="goal-card-foot">{{ p.concluidos }} de {{ p.total }} concluídos · <span class="goal-percent">{{ p.percentual | number: '1.0-2' }}%</span></p>
+          }
+        </article>
+      } @empty {
+        @if (!carregando() && !erro()) {
+          <p>Nenhum módulo.</p>
         }
-      </article>
-    } @empty {
-      @if (!carregando() && !erro()) {
-        <p>Nenhum módulo.</p>
       }
-    }
+    </div>
   `,
 })
 export class Modulos {
