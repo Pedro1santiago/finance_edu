@@ -15,40 +15,62 @@ const naoEncontrada = 'Meta não encontrada';
   selector: 'app-meta-detalhe',
   imports: [CurrencyPipe, DatePipe, DecimalPipe, ReactiveFormsModule, RouterLink],
   template: `
-    <a routerLink="/metas">Voltar</a>
+    <a class="text-link" routerLink="/metas">Voltar</a>
     @if (erro()) {
       <p role="alert">{{ erro() }}</p>
     }
     @if (meta(); as m) {
-      <h2>{{ m.nome }}</h2>
-      <p>{{ m.status }} · {{ m.percentualAtingido | number: '1.0-2' }}%</p>
-      <progress max="100" [value]="m.percentualAtingido"></progress>
-      <p>Economizado: {{ m.totalEconomizado | currency: 'BRL' }} de {{ m.valorAlvo | currency: 'BRL' }}</p>
-      <p>Restante: {{ m.valorRestante | currency: 'BRL' }}</p>
-      <p>Prazo: {{ m.prazo | date: 'dd/MM/yyyy' }}</p>
-      @if (m.estimativaConclusao) {
-        <p>Estimativa de conclusão: {{ m.estimativaConclusao | date: 'dd/MM/yyyy' }}</p>
-      }
-      <form [formGroup]="form" (ngSubmit)="aportar()">
-        <label>Valor <input type="number" step="any" name="valor" formControlName="valor" /></label>
-        <label>Data <input type="date" name="data" formControlName="data" /></label>
-        @if (form.touched && form.invalid) {
-          <p role="alert">Informe um valor maior que zero e uma data.</p>
-        }
-        @if (erroAporte()) {
-          <p role="alert">{{ erroAporte() }}</p>
-        }
-        <button type="submit" [disabled]="enviando()">Registrar aporte</button>
-      </form>
-      <h3>Aportes</h3>
-      <ul>
-        @for (a of aportes(); track a.id) {
-          <li>{{ a.valor | currency: 'BRL' }} em {{ a.data | date: 'dd/MM/yyyy' }}</li>
-        } @empty {
-          <li>Nenhum aporte.</li>
-        }
-      </ul>
+      <div class="page-intro"><h2>{{ m.nome }}</h2></div>
+      <article class="goal-card">
+        <span class="goal-percent">{{ m.status }}</span>
+        <div class="goal-amounts">
+          <span>Economizado: <strong>{{ m.totalEconomizado | currency: 'BRL' }}</strong> de {{ m.valorAlvo | currency: 'BRL' }}</span>
+          <span>Restante: <strong>{{ m.valorRestante | currency: 'BRL' }}</strong></span>
+        </div>
+        <div class="goal-progress" role="progressbar" [attr.aria-label]="m.nome" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="m.percentualAtingido">
+          <i [style.width.%]="m.percentualAtingido"></i>
+        </div>
+        <div class="goal-card-foot">
+          <span class="goal-percent">{{ m.percentualAtingido | number: '1.0-2' }}%</span>
+          <span>Prazo: {{ m.prazo | date: 'dd/MM/yyyy' }}</span>
+          @if (m.estimativaConclusao) {
+            <span>Estimativa de conclusão: {{ m.estimativaConclusao | date: 'dd/MM/yyyy' }}</span>
+          }
+        </div>
+      </article>
+      <section class="dashboard-panel painel">
+        <div class="panel-heading"><div><h3>Registrar aporte</h3></div></div>
+        <form class="sim-form" [formGroup]="form" (ngSubmit)="aportar()">
+          <div class="field-row">
+            <label class="form-field">Valor <input class="text-input" type="number" step="any" name="valor" formControlName="valor" /></label>
+            <label class="form-field">Data <input class="text-input" type="date" name="data" formControlName="data" /></label>
+          </div>
+          @if (form.touched && form.invalid) {
+            <p role="alert">Informe um valor maior que zero e uma data.</p>
+          }
+          @if (erroAporte()) {
+            <p role="alert">{{ erroAporte() }}</p>
+          }
+          <button type="submit" class="button button-primary" [disabled]="enviando()">Registrar aporte</button>
+        </form>
+      </section>
+      <section class="dashboard-panel painel">
+        <div class="panel-heading"><div><h3>Aportes</h3></div></div>
+        <ul class="aportes">
+          @for (a of aportes(); track a.id) {
+            <li>{{ a.valor | currency: 'BRL' }} em {{ a.data | date: 'dd/MM/yyyy' }}</li>
+          } @empty {
+            <li>Nenhum aporte.</li>
+          }
+        </ul>
+      </section>
     }
+  `,
+  styles: `
+    .goal-card, .painel { margin-top: 14px; }
+    .painel { min-height: 0; }
+    .sim-form { padding: 12px 0 0; }
+    .aportes { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 8px; }
   `,
 })
 export class MetaDetalhe {

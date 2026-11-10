@@ -1,4 +1,4 @@
-import { Component, OnInit, input, output, signal } from '@angular/core';
+import { Component, ElementRef, OnInit, afterNextRender, input, output, signal, viewChild } from '@angular/core';
 import { AbstractControl, FormControl, FormGroup, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { Observable } from 'rxjs';
 import { mensagemErro } from '../auth/auth.service';
@@ -13,26 +13,38 @@ const prazoFuturo = (c: AbstractControl): ValidationErrors | null => (c.value >=
   imports: [ReactiveFormsModule],
   template: `
     <form [formGroup]="form" (ngSubmit)="enviar()">
-      <label>Nome <input type="text" name="nome" formControlName="nome" /></label>
+      <label class="form-field">Nome <input #nome class="text-input" type="text" name="nome" formControlName="nome" /></label>
       @if (form.controls.nome.touched && form.controls.nome.invalid) {
         <p role="alert">Nome obrigatório.</p>
       }
-      <label>Valor alvo <input type="number" step="any" name="valorAlvo" formControlName="valorAlvo" /></label>
+      <div class="field-row">
+        <label class="form-field">Valor alvo <input class="text-input" type="number" step="any" name="valorAlvo" formControlName="valorAlvo" /></label>
+        <label class="form-field">Prazo <input class="text-input" type="date" name="prazo" formControlName="prazo" /></label>
+      </div>
       @if (form.controls.valorAlvo.touched && form.controls.valorAlvo.invalid) {
         <p role="alert">Valor alvo deve ser maior que zero.</p>
       }
-      <label>Prazo <input type="date" name="prazo" formControlName="prazo" /></label>
       @if (form.controls.prazo.touched && form.controls.prazo.invalid) {
         <p role="alert">Prazo não pode estar no passado.</p>
       }
       @if (erro()) {
         <p role="alert">{{ erro() }}</p>
       }
-      <button type="submit" [disabled]="enviando()">Salvar</button>
+      <div class="modal-actions">
+        <button type="button" class="button button-quiet" (click)="cancelar.emit()">Cancelar</button>
+        <button type="submit" class="button button-primary" [disabled]="enviando()">Salvar</button>
+      </div>
     </form>
   `,
 })
 export class FormMeta implements OnInit {
+  private nome = viewChild.required<ElementRef<HTMLInputElement>>('nome');
+  cancelar = output();
+
+  constructor() {
+    afterNextRender(() => this.nome().nativeElement.focus());
+  }
+
   acao = input.required<(d: MetaIn) => Observable<unknown>>();
   inicial = input<MetaIn>();
   salvo = output();

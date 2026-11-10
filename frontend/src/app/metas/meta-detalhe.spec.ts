@@ -67,7 +67,9 @@ describe('MetaDetalhe', () => {
     expect(texto).toContain('R$ 4.000,00');
     expect(texto).toContain('R$ 1.000,00');
     expect(texto).toContain('10/05/2027');
-    expect(el.querySelector('progress')!.value).toBe(20);
+    const barra = el.querySelector('.goal-progress')!;
+    expect(barra.getAttribute('aria-valuenow')).toBe('20');
+    expect(barra.querySelector('i')!.style.width).toBe('20%');
     expect(el.querySelectorAll('li').length).toBe(1);
   });
 
