@@ -17,4 +17,17 @@ describe('Simuladores', () => {
       expect(titulos).toEqual([nome]);
     },
   );
+
+  it('abas usam role tab e aria-selected na aba ativa', async () => {
+    await TestBed.configureTestingModule({ imports: [Simuladores] }).compileComponents();
+    const fixture = TestBed.createComponent(Simuladores);
+    await fixture.whenStable();
+    const el = fixture.nativeElement as HTMLElement;
+    expect(el.querySelector('[role=tablist]')).not.toBeNull();
+    const abas = () => [...el.querySelectorAll<HTMLElement>('[role=tab]')];
+    expect(abas().map((a) => a.getAttribute('aria-selected'))).toEqual(['true', 'false', 'false', 'false']);
+    abas()[2].click();
+    fixture.detectChanges();
+    expect(abas().map((a) => a.getAttribute('aria-selected'))).toEqual(['false', 'false', 'true', 'false']);
+  });
 });

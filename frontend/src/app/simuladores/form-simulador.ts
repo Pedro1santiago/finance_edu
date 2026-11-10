@@ -6,6 +6,7 @@ import { mensagemErro } from '../auth/auth.service';
 interface Campo<K extends string> {
   nome: K;
   rotulo: string;
+  unidade?: string;
   validadores: ValidatorFn[];
 }
 
@@ -21,19 +22,42 @@ const preenchido = <K extends string>(v: Record<string, number | null>): v is Re
   imports: [ReactiveFormsModule],
   template: `
     @let e = estado();
-    <form [formGroup]="e.form" (ngSubmit)="e.enviar()">
-      @for (c of e.campos; track c.nome) {
-        <label>{{ c.rotulo }} <input type="number" step="any" [name]="c.nome" [formControlName]="c.nome" /></label>
-        @if (e.form.controls[c.nome].touched && e.form.controls[c.nome].invalid) {
-          <p role="alert">{{ c.rotulo }} inválido.</p>
+    <div class="simulator-layout">
+      <form class="sim-form" [formGroup]="e.form" (ngSubmit)="e.enviar()">
+        <div class="field-row">
+          @for (c of e.campos; track c.nome) {
+            <div class="form-field">
+              <label>
+                {{ c.rotulo }}
+                <span class="input-wrap">
+                  @if (c.unidade === 'R$') { <b>R$</b> }
+                  <input type="number" step="any" [name]="c.nome" [formControlName]="c.nome" />
+                  @if (c.unidade && c.unidade !== 'R$') { <b>{{ c.unidade }}</b> }
+                </span>
+              </label>
+              @if (e.form.controls[c.nome].touched && e.form.controls[c.nome].invalid) {
+                <p role="alert">{{ c.rotulo }} inválido.</p>
+              }
+            </div>
+          }
+        </div>
+        @if (e.erro()) {
+          <p role="alert">{{ e.erro() }}</p>
         }
-      }
-      @if (e.erro()) {
-        <p role="alert">{{ e.erro() }}</p>
-      }
-      <button type="submit" [disabled]="e.enviando()">Simular</button>
-    </form>
-    <ng-content />
+        <button type="submit" class="button button-primary sim-submit" [disabled]="e.enviando()">Simular</button>
+      </form>
+      <div class="result-card">
+        @if (e.resultado()) {
+          <ng-content />
+        } @else {
+          <p>Preencha os campos e clique em Simular para ver o resultado.</p>
+        }
+      </div>
+    </div>
+  `,
+  styles: `
+    label { display: grid; gap: 7px; }
+    .form-field p { margin: 0; }
   `,
 })
 export class FormSimulador {

@@ -45,7 +45,8 @@ describe('Economia', () => {
 
   it('1 mes no singular', async () => {
     const el = await montar({ objetivo: '100', economiaMensal: '100' }, of({ mesesNecessarios: 1, economiaAnual: 1200 }));
-    expect(el.textContent).toContain('Meses necessários: 1 mês');
+    expect(el.querySelector('.result-eyebrow')!.textContent).toBe('MESES NECESSÁRIOS');
+    expect(el.querySelector('.result-amount')!.textContent!.trim()).toBe('1 mês');
     expect(el.textContent).not.toContain('1 meses');
   });
 
