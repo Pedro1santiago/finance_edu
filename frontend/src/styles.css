@@ -213,8 +213,10 @@ body.modal-open { overflow: hidden; }
 .page-content { overflow-wrap: anywhere; }
 .nav-link, .brand-name, .breadcrumb, .topbar { overflow-wrap: normal; word-break: keep-all; }
 .grafico { position: relative; height: 320px; max-height: 320px; }
+@media (max-width: 780px) { .sidebar:not(.open) { box-shadow: none; visibility: hidden; } .sidebar.open { visibility: visible; } }
 .sim-body .simulator-layout { grid-template-columns: minmax(0, 1.5fr) minmax(240px, 1fr); }
-.input-wrap input[type="number"] { -moz-appearance: textfield; }
+.sim-tabs { overflow-y: hidden; scrollbar-width: none; }
+@media (max-width: 780px) { .sim-body .simulator-layout { grid-template-columns: 1fr; } .sim-body { padding: 14px; } }
 .button:disabled { opacity: .6; cursor: not-allowed; }
 
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
