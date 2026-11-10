@@ -92,6 +92,47 @@ describe('Metas', () => {
       expect(el.querySelector('.modal')).toBeNull();
     });
 
+    const abrir = async (el: HTMLElement, atualizar: () => Promise<void>, texto: string) => {
+      const gatilho = botao(el, texto);
+      gatilho.focus();
+      gatilho.click();
+      await atualizar();
+      return gatilho;
+    };
+    const tab = (shiftKey: boolean) => document.activeElement!.dispatchEvent(new KeyboardEvent('keydown', { key: 'Tab', shiftKey, bubbles: true, cancelable: true }));
+
+    it.each([
+      ['botao fechar', (el: HTMLElement) => el.querySelector<HTMLButtonElement>('.modal-close')!.click()],
+      ['Cancelar', (el: HTMLElement) => botao(el, 'Cancelar').click()],
+      ['Esc', () => document.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape' }))],
+    ])('fechar por %s devolve o foco a Nova meta', async (_, fechar) => {
+      const { el, atualizar } = await montar([]);
+      const gatilho = await abrir(el, atualizar, 'Nova meta');
+      fechar(el);
+      await atualizar();
+      expect(el.querySelector('.modal')).toBeNull();
+      expect(document.activeElement).toBe(gatilho);
+    });
+
+    it('fechar a edicao devolve o foco ao botao Editar', async () => {
+      const { el, atualizar } = await montar([meta({ id: 3 })]);
+      const gatilho = await abrir(el, atualizar, 'Editar');
+      el.querySelector<HTMLButtonElement>('.modal-close')!.click();
+      await atualizar();
+      expect(document.activeElement).toBe(gatilho);
+    });
+
+    it('Tab no ultimo campo volta ao primeiro e Shift+Tab no primeiro vai ao ultimo', async () => {
+      const { el, atualizar } = await montar([]);
+      await abrir(el, atualizar, 'Nova meta');
+      const campos = [...el.querySelectorAll<HTMLElement>('.modal button, .modal input')];
+      campos.at(-1)!.focus();
+      tab(false);
+      expect(document.activeElement).toBe(campos[0]);
+      tab(true);
+      expect(document.activeElement).toBe(campos.at(-1));
+    });
+
     it('Esc fecha o dialogo', async () => {
       const { el, atualizar } = await montar([]);
       botao(el, 'Nova meta').click();

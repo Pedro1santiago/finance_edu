@@ -1,5 +1,5 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
-import { Component, computed, inject, signal } from '@angular/core';
+import { Component, ElementRef, computed, inject, signal, viewChild } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { mensagemErro } from '../auth/auth.service';
 import { FormMeta } from './form-meta';
@@ -8,14 +8,14 @@ import { Meta, MetaIn, MetaService } from './meta.service';
 @Component({
   selector: 'app-metas',
   imports: [CurrencyPipe, DatePipe, DecimalPipe, FormMeta, RouterLink],
-  host: { '(document:keydown.escape)': 'modal.set(null)' },
+  host: { '(document:keydown)': 'teclado($event)' },
   template: `
     <div class="page-intro intro-with-action">
       <div>
         <h1>Metas</h1>
         <p class="page-lead">Defina objetivos e acompanhe cada aporte.</p>
       </div>
-      <button type="button" class="button button-primary" (click)="modal.set('nova')"><span aria-hidden="true">+</span> Nova meta</button>
+      <button type="button" class="button button-primary" (click)="abrir('nova')"><span aria-hidden="true">+</span> Nova meta</button>
     </div>
     <div class="goal-summary">
       <div class="goal-summary-icon" aria-hidden="true">$</div>
@@ -40,7 +40,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
               <span>{{ m.status }} · até {{ m.prazo | date: 'dd/MM/yyyy' }}</span>
             </div>
             <div class="goal-menu">
-              <button type="button" (click)="modal.set(m)">Editar</button>
+              <button type="button" (click)="abrir(m)">Editar</button>
               <button type="button" class="excluir" (click)="excluir(m.id)">Excluir</button>
             </div>
           </div>
@@ -69,12 +69,12 @@ import { Meta, MetaIn, MetaService } from './meta.service';
     </div>
     @if (modal(); as m) {
       <div class="modal-backdrop">
-        <div class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-modal">
+        <div #dialogo class="modal" role="dialog" aria-modal="true" aria-labelledby="titulo-modal">
           <div class="modal-heading">
             <h2 id="titulo-modal">{{ m === 'nova' ? 'Nova meta' : 'Editar meta' }}</h2>
-            <button type="button" class="modal-close" aria-label="Fechar" (click)="modal.set(null)">×</button>
+            <button type="button" class="modal-close" aria-label="Fechar" (click)="fechar()">×</button>
           </div>
-          <app-form-meta [inicial]="m === 'nova' ? undefined : m" [acao]="m === 'nova' ? criar : alterar(m.id)" (salvo)="modal.set(null); carregar()" (cancelar)="modal.set(null)" />
+          <app-form-meta [inicial]="m === 'nova' ? undefined : m" [acao]="m === 'nova' ? criar : alterar(m.id)" (salvo)="fechar(); carregar()" (cancelar)="fechar()" />
         </div>
       </div>
     }
@@ -91,6 +91,37 @@ export class Metas {
   erro = signal('');
   carregando = signal(true);
   modal = signal<Meta | 'nova' | null>(null);
+  private dialogo = viewChild<ElementRef<HTMLElement>>('dialogo');
+  private gatilho: HTMLElement | null = null;
+
+  abrir(m: Meta | 'nova') {
+    const ativo = document.activeElement;
+    this.gatilho = ativo instanceof HTMLElement ? ativo : null;
+    this.modal.set(m);
+  }
+
+  fechar() {
+    this.modal.set(null);
+    this.gatilho?.focus();
+    this.gatilho = null;
+  }
+
+  teclado(e: KeyboardEvent) {
+    if (!this.modal()) return;
+    if (e.key === 'Escape') return this.fechar();
+    if (e.key !== 'Tab') return;
+    const campos = [...(this.dialogo()?.nativeElement.querySelectorAll<HTMLElement>('button:not([disabled]), input:not([disabled])') ?? [])];
+    const primeiro = campos[0];
+    const ultimo = campos.at(-1);
+    const ativo = document.activeElement;
+    if (e.shiftKey && (ativo === primeiro || !campos.some((c) => c === ativo))) {
+      e.preventDefault();
+      ultimo?.focus();
+    } else if (!e.shiftKey && (ativo === ultimo || !campos.some((c) => c === ativo))) {
+      e.preventDefault();
+      primeiro?.focus();
+    }
+  }
 
   resumo = computed(() => {
     const m = this.metas();
