@@ -1,8 +1,9 @@
 import { CurrencyPipe, DatePipe, DecimalPipe } from '@angular/common';
 import { Component, inject, signal } from '@angular/core';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { RouterLink } from '@angular/router';
-import { forkJoin } from 'rxjs';
-import { mensagemErro } from '../auth/auth.service';
+import { catchError, forkJoin, map, of } from 'rxjs';
+import { AuthService, mensagemErro } from '../auth/auth.service';
 import { AporteMes, Dashboard as Dados, DashboardService, TipoSimulacao } from './dashboard.service';
 import { GraficoAportes } from './grafico-aportes';
 
@@ -17,40 +18,82 @@ const rotulos: Record<TipoSimulacao, string> = {
   selector: 'app-dashboard',
   imports: [CurrencyPipe, DatePipe, DecimalPipe, GraficoAportes, RouterLink],
   template: `
-    <h2>Dashboard</h2>
+    <div class="welcome-row">
+      <div>
+        <h1>Olá, <span>{{ nome() }}</span></h1>
+        <p class="page-lead">Acompanhe seu progresso financeiro e de estudos.</p>
+      </div>
+    </div>
     @if (carregando()) {
-      <p>Carregando…</p>
+      <p class="page-lead">Carregando…</p>
     } @else if (erro()) {
       <p role="alert">{{ erro() }}</p>
-      <button type="button" (click)="carregar()">Tentar novamente</button>
+      <button type="button" class="button button-primary" (click)="carregar()">Tentar novamente</button>
     } @else if (dados(); as d) {
-      <p>Total economizado: {{ d.totalEconomizado | currency: 'BRL' }}</p>
-      <p>Metas ativas: {{ d.metasAtivas }} · Metas concluídas: {{ d.metasConcluidas }}</p>
-      <p>Progresso médio das metas: {{ d.percentualMedioMetas | number: '1.0-2' }}%</p>
-      <p>Conteúdos concluídos: {{ d.percentualConteudos | number: '1.0-2' }}%</p>
-      @for (p of d.progressoConteudos; track p.moduloId) {
-        <article>
-          <h3>{{ p.titulo }}</h3>
-          <progress max="100" [value]="p.percentual"></progress>
-          <p>{{ p.concluidos }} de {{ p.total }} concluídos</p>
-        </article>
-      }
-      <h3>Aportes por mês</h3>
-      <app-grafico-aportes [aportes]="aportes()" />
-      <h3>Últimas simulações</h3>
-      @for (s of d.ultimasSimulacoes; track s.id) {
-        <p>{{ rotulos[s.tipo] }} · {{ s.criadaEm | date: 'dd/MM/yyyy' }}</p>
-      } @empty {
-        <p>Nenhuma simulação ainda. <a routerLink="/simuladores">Ir para simuladores</a></p>
-      }
-      @if (!d.metasAtivas && !d.metasConcluidas) {
-        <p><a routerLink="/metas">Criar uma meta</a></p>
-      }
+      <div class="dashboard-stats">
+        <div class="dash-stat">
+          <span class="dash-icon violet" aria-hidden="true">$</span>
+          <span class="stat-caption">Total economizado</span>
+          <strong>{{ d.totalEconomizado | currency: 'BRL' }}</strong>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-icon aqua" aria-hidden="true">◎</span>
+          <span class="stat-caption">Metas ativas</span>
+          <strong>{{ d.metasAtivas }}</strong>
+          <small>Progresso médio: {{ d.percentualMedioMetas | number: '1.0-2' }}%</small>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-icon amber" aria-hidden="true">✓</span>
+          <span class="stat-caption">Metas concluídas</span>
+          <strong>{{ d.metasConcluidas }}</strong>
+        </div>
+        <div class="dash-stat">
+          <span class="dash-icon rose" aria-hidden="true">▤</span>
+          <span class="stat-caption">Conteúdos concluídos</span>
+          <strong>{{ d.percentualConteudos | number: '1.0-2' }}%</strong>
+        </div>
+      </div>
+      <div class="dashboard-grid">
+        <section class="dashboard-panel">
+          <div class="panel-heading"><div><h2>Aportes por mês</h2><p>Últimos 12 meses</p></div></div>
+          <div class="grafico"><app-grafico-aportes [aportes]="aportes()" /></div>
+        </section>
+        <section class="dashboard-panel">
+          <div class="panel-heading"><div><h2>Progresso por módulo</h2><p>Conteúdos concluídos</p></div></div>
+          <div class="dashboard-goals">
+            @for (p of d.progressoConteudos; track p.moduloId) {
+              <div class="dashboard-goal-row">
+                <div class="dashboard-goal-name"><span>{{ p.titulo }}</span></div>
+                <div class="dashboard-goal-progress" role="progressbar" [attr.aria-label]="p.titulo" aria-valuemin="0" aria-valuemax="100" [attr.aria-valuenow]="p.percentual">
+                  <i [style.width.%]="p.percentual"></i>
+                </div>
+                <div class="dashboard-goal-value"><strong>{{ p.concluidos }}</strong> de {{ p.total }} concluídos</div>
+              </div>
+            }
+          </div>
+        </section>
+      </div>
+      <section class="dashboard-panel painel-simulacoes">
+        <div class="panel-heading"><div><h2>Últimas simulações</h2></div></div>
+        @for (s of d.ultimasSimulacoes; track s.id) {
+          <p>{{ rotulos[s.tipo] }} · {{ s.criadaEm | date: 'dd/MM/yyyy' }}</p>
+        } @empty {
+          <p>Nenhuma simulação ainda. <a class="text-link" routerLink="/simuladores">Ir para simuladores</a></p>
+        }
+        @if (!d.metasAtivas && !d.metasConcluidas) {
+          <p><a class="text-link" routerLink="/metas">Criar uma meta</a></p>
+        }
+      </section>
     }
+  `,
+  styles: `
+    .stat-caption { text-transform: uppercase; }
+    .painel-simulacoes { margin-top: 14px; min-height: 0; }
   `,
 })
 export class Dashboard {
   private api = inject(DashboardService);
+  nome = toSignal(inject(AuthService).me().pipe(map((p) => p.nome), catchError(() => of(''))), { initialValue: '' });
   rotulos = rotulos;
   carregando = signal(true);
   erro = signal('');

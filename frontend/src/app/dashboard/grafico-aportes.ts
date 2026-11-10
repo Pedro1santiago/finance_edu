@@ -4,7 +4,9 @@ import { AporteMes } from './dashboard.service';
 
 const meses = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'];
 
-const rotulo = (mes: string) => {
+const cor = (variavel: string) => getComputedStyle(document.documentElement).getPropertyValue(variavel).trim();
+
+const rotulo =(mes: string) => {
   const [ano, numero] = mes.split('-');
   return `${meses[Number(numero) - 1]}/${ano.slice(2)}`;
 };
@@ -38,8 +40,9 @@ export class GraficoAportes {
         type: 'bar',
         data: {
           labels: aportes.map((a) => rotulo(a.mes)),
-          datasets: [{ label: 'Aportes', data: aportes.map((a) => a.total) }],
+          datasets: [{ label: 'Aportes', data: aportes.map((a) => a.total), backgroundColor: cor('--purple') }],
         },
+        options: { maintainAspectRatio: false },
       });
     });
   }
