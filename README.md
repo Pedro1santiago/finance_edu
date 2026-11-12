@@ -2,7 +2,15 @@
 
 App de educação financeira: simuladores, metas, conteúdos e dashboard de aportes. Backend Java 25 + Spring Boot 4 + PostgreSQL (`backend/`), frontend Angular (`frontend/`). Plano em `PROJECT.md`.
 
-## Rodar local
+## Rodar tudo com Docker
+
+```bash
+docker compose up --build
+```
+
+Sobe Postgres (`localhost:5433`), API (`http://localhost:8080`, Swagger em `/swagger-ui.html`) e frontend (`http://localhost:4200`). A API usa o profile `dev` só para uso local; em produção defina `JWT_SECRET` e `DB_*` (seção Deploy).
+
+## Rodar local sem Docker para a API
 
 Veja `AGENTS.md` (comandos de verificação) e `backend/README.md` (API, Swagger, testes).
 

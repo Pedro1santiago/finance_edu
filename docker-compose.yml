@@ -1,0 +1,45 @@
+# Sobe a plataforma inteira localmente: docker compose up --build
+# Front em http://localhost:4200, API em http://localhost:8080, Postgres em localhost:5433.
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: financeedu
+      POSTGRES_USER: financeedu
+      POSTGRES_PASSWORD: financeedu
+    ports:
+      - "5433:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U financeedu -d financeedu"]
+      interval: 5s
+      retries: 10
+
+  api:
+    build: ./backend
+    environment:
+      # profile dev: só para rodar local; em produção use JWT_SECRET próprio (ver README)
+      SPRING_PROFILES_ACTIVE: dev
+      DB_URL: jdbc:postgresql://db:5432/financeedu
+      DB_USER: financeedu
+      DB_PASSWORD: financeedu
+      CORS_ORIGENS: http://localhost:4200
+    ports:
+      - "8080:8080"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  web:
+    build:
+      context: ./frontend
+      args:
+        API_URL: http://localhost:8080
+    ports:
+      - "4200:80"
+    depends_on:
+      - api
+
+volumes:
+  pgdata:
