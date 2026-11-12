@@ -12,6 +12,7 @@ export interface Meta extends MetaIn {
   status: 'ATIVA' | 'CONCLUIDA';
   estimativaConclusao: string | null;
 }
+export const rotuloStatus: Record<Meta['status'], string> = { ATIVA: 'Ativa', CONCLUIDA: 'Concluída' };
 export interface AporteIn { valor: number; data: string }
 export interface Aporte extends AporteIn { id: number }
 

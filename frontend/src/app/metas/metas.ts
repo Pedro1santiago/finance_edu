@@ -3,7 +3,7 @@ import { Component, ElementRef, computed, inject, signal, viewChild } from '@ang
 import { RouterLink } from '@angular/router';
 import { mensagemErro } from '../auth/auth.service';
 import { FormMeta } from './form-meta';
-import { Meta, MetaIn, MetaService } from './meta.service';
+import { Meta, MetaIn, MetaService, rotuloStatus } from './meta.service';
 
 @Component({
   selector: 'app-metas',
@@ -37,7 +37,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
           <div class="goal-card-top">
             <div class="goal-info">
               <h3><a [routerLink]="[m.id]">{{ m.nome }}</a></h3>
-              <span>{{ m.status }} · até {{ m.prazo | date: 'dd/MM/yyyy' }}</span>
+              <span>{{ rotuloStatus[m.status] }} · até {{ m.prazo | date: 'dd/MM/yyyy' }}</span>
             </div>
             <div class="goal-menu">
               <button type="button" (click)="abrir(m)">Editar</button>
@@ -87,6 +87,7 @@ import { Meta, MetaIn, MetaService } from './meta.service';
 })
 export class Metas {
   private api = inject(MetaService);
+  rotuloStatus = rotuloStatus;
   metas = signal<Meta[]>([]);
   erro = signal('');
   carregando = signal(true);

@@ -53,7 +53,7 @@ describe('Metas', () => {
     const texto = el.textContent!.replaceAll(' ', ' ');
     expect(texto).toContain('Viagem');
     expect(texto).toContain('20%');
-    expect(texto).toContain('ATIVA');
+    expect(el.querySelector('.goal-info span')?.textContent).toMatch(/^Ativa · até /);
     expect(texto).toContain('R$ 1.000,00');
     expect(texto).toContain('R$ 5.000,00');
     const barra = el.querySelector('.goal-progress')!;
