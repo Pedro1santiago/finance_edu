@@ -63,7 +63,8 @@ describe('MetaDetalhe', () => {
     const texto = el.textContent!.replaceAll(' ', ' ');
     expect(texto).toContain('Viagem');
     expect(texto).toContain('20%');
-    expect(texto).toContain('ATIVA');
+    expect(texto).toContain('Ativa');
+    expect(texto).not.toContain('ATIVA');
     expect(texto).toContain('R$ 4.000,00');
     expect(texto).toContain('R$ 1.000,00');
     expect(texto).toContain('10/05/2027');

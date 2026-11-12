@@ -75,20 +75,27 @@ const rotulos: Record<TipoSimulacao, string> = {
       </div>
       <section class="dashboard-panel painel-simulacoes">
         <div class="panel-heading"><div><h2>Últimas simulações</h2></div></div>
-        @for (s of d.ultimasSimulacoes; track s.id) {
-          <p>{{ rotulos[s.tipo] }} · {{ s.criadaEm | date: 'dd/MM/yyyy' }}</p>
-        } @empty {
-          <p>Nenhuma simulação ainda. <a class="text-link" routerLink="/simuladores">Ir para simuladores</a></p>
-        }
-        @if (!d.metasAtivas && !d.metasConcluidas) {
-          <p><a class="text-link" routerLink="/metas">Criar uma meta</a></p>
-        }
+        <div class="dashboard-goals">
+          @for (s of d.ultimasSimulacoes; track s.id) {
+            <div class="linha-simulacao">
+              <div class="dashboard-goal-name"><i aria-hidden="true">∿</i><span>{{ rotulos[s.tipo] }}</span></div>
+              <div class="dashboard-goal-value">{{ s.criadaEm | date: 'dd/MM/yyyy' }}</div>
+            </div>
+          } @empty {
+            <p class="vazio">Nenhuma simulação ainda. <a class="text-link" routerLink="/simuladores">Ir para simuladores</a></p>
+          }
+          @if (!d.metasAtivas && !d.metasConcluidas) {
+            <p class="vazio"><a class="text-link" routerLink="/metas">Criar uma meta</a></p>
+          }
+        </div>
       </section>
     }
   `,
   styles: `
     .stat-caption { text-transform: uppercase; }
     .painel-simulacoes { margin-top: 14px; min-height: 0; }
+    .linha-simulacao { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+    .vazio { margin: 0; color: var(--muted); font-size: 11px; }
   `,
 })
 export class Dashboard {

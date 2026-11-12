@@ -7,7 +7,7 @@ import { forkJoin } from 'rxjs';
 import { mensagemErro } from '../auth/auth.service';
 import { positivo } from '../simuladores/form-simulador';
 import { hoje } from './form-meta';
-import { Aporte, Meta, MetaService } from './meta.service';
+import { Aporte, Meta, MetaService, rotuloStatus } from './meta.service';
 
 const naoEncontrada = 'Meta não encontrada';
 
@@ -22,7 +22,7 @@ const naoEncontrada = 'Meta não encontrada';
     @if (meta(); as m) {
       <div class="page-intro"><h2>{{ m.nome }}</h2></div>
       <article class="goal-card">
-        <span class="goal-percent">{{ m.status }}</span>
+        <span class="goal-percent">{{ rotuloStatus[m.status] }}</span>
         <div class="goal-amounts">
           <span>Economizado: <strong>{{ m.totalEconomizado | currency: 'BRL' }}</strong> de {{ m.valorAlvo | currency: 'BRL' }}</span>
           <span>Restante: <strong>{{ m.valorRestante | currency: 'BRL' }}</strong></span>
@@ -76,6 +76,7 @@ const naoEncontrada = 'Meta não encontrada';
 export class MetaDetalhe {
   private api = inject(MetaService);
   private id = Number(inject(ActivatedRoute).snapshot.paramMap.get('id'));
+  rotuloStatus = rotuloStatus;
   meta = signal<Meta | null>(null);
   aportes = signal<Aporte[]>([]);
   erro = signal('');
