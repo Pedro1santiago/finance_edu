@@ -28,5 +28,5 @@ node scripts/verificar-deploy.mjs
 ## Regras do repositório
 - Trabalho na branch `dev`; branches de fatia saem da `dev` e voltam por merge local.
 - Nunca fazer push.
-- Commits sem `Co-Authored-By` e sem mencionar Claude ou IA.
+- Commits sem linha `Co-Authored-By`.
 - Mensagens de commit em português, estilo `feat: ...`, `fix: ...`, `test: ...`.
