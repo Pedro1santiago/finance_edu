@@ -29,7 +29,7 @@ Jovens, estudantes e adultos aprendem finanças em conteúdos soltos (vídeos, p
 - Auth JWT HS256 via Spring Security Resource Server — stateless, sem lib extra.
 - Frontend Angular + Chart.js — exigência; Chart.js para gráficos do dashboard.
 - REST JSON + Swagger (springdoc) — contrato visível para o front.
-- Deploy: backend Docker no Render (free), Postgres no Neon (free), front no Vercel — grátis, deploy por git push.
+- Deploy: backend Docker no Render (free), Postgres no Supabase (free, via Session pooler), front no Vercel — grátis, deploy por git push.
 - Dinheiro em `BigDecimal`, escala 2, `HALF_EVEN` — evita erro de ponto flutuante.
 
 ## Structure

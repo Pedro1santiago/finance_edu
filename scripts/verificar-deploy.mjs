@@ -30,7 +30,7 @@ checar(/apiUrl:\s*'https:\/\//.test(ler('frontend/src/environments/environment.t
 
 // README
 const readme = ler('README.md');
-for (const termo of ['Rodar local', 'Neon', 'Render', 'Vercel', 'DB_URL', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET', 'CORS_ORIGENS']) {
+for (const termo of ['Rodar local', 'Supabase', 'Render', 'Vercel', 'DB_URL', 'DB_USER', 'DB_PASSWORD', 'JWT_SECRET', 'CORS_ORIGENS']) {
   checar(readme.includes(termo), `README.md: falta "${termo}"`);
 }
 
