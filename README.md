@@ -12,11 +12,19 @@ Sobe Postgres (`localhost:5433`), API (`http://localhost:8080`, Swagger em `/swa
 
 ## Rodar local sem Docker para a API
 
-Veja `AGENTS.md` (comandos de verificação) e `backend/README.md` (API, Swagger, testes).
+Veja `backend/README.md` (API, Swagger, testes).
 
 ```bash
 cd backend && docker compose up -d && ./mvnw spring-boot:run -Dspring-boot.run.profiles=dev   # API em :8080
 cd frontend && npm install && npm start                        # app em :4200
+```
+
+## Testes
+
+```bash
+cd backend && ./mvnw verify                                                   # unidade + integração (Postgres embutido, sem Docker)
+cd frontend && npm run lint && npx tsc --noEmit -p tsconfig.app.json && npm test -- --no-watch
+node scripts/verificar-deploy.mjs                                             # artefatos de deploy
 ```
 
 ## Deploy (Supabase, Render, Vercel)
