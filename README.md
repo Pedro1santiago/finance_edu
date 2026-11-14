@@ -27,7 +27,7 @@ Tudo no plano gratuito. Siga a ordem.
 
 1. No [Supabase](https://supabase.com), abra o projeto e clique em **Connect**.
 2. Escolha **Session pooler** (porta `5432`, IPv4). Não use a conexão direta `db.<ref>.supabase.co` (só IPv6, o Render não alcança) nem o Transaction pooler `6543` (quebra prepared statements do JDBC).
-3. Monte a URL JDBC a partir do host do pooler: `jdbc:postgresql://aws-0-<regiao>.pooler.supabase.com:5432/postgres?sslmode=require`.
+3. Monte a URL JDBC a partir do host do pooler: `jdbc:postgresql://<host-do-pooler>:5432/postgres?sslmode=require` (o host tem o formato `aws-N-<regiao>.pooler.supabase.com`).
 4. O usuário do pooler é `postgres.<project-ref>`; a senha é a do banco (Project Settings > Database), não as chaves de API.
 
 O Flyway cria as tabelas no schema `public` na primeira subida; não há passo de migration. As chaves `SUPABASE_*` do `.env` não são usadas pela API (ela tem login próprio com JWT).
@@ -40,7 +40,7 @@ O Flyway cria as tabelas no schema `public` na primeira subida; não há passo d
 
 | Variável | Valor |
 |---|---|
-| `DB_URL` | URL JDBC do Session pooler, ex.: `jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require` (sem usuário/senha na URL) |
+| `DB_URL` | URL JDBC do Session pooler, ex.: `jdbc:postgresql://aws-1-us-west-2.pooler.supabase.com:5432/postgres?sslmode=require` (sem usuário/senha na URL) |
 | `DB_USER` | `postgres.<project-ref>` |
 | `DB_PASSWORD` | senha do banco no Supabase |
 | `JWT_SECRET` | gerada automaticamente pelo Blueprint; no modo manual, gere uma com 32+ caracteres (ex.: `openssl rand -base64 48`) |
