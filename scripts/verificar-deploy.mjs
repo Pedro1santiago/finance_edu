@@ -8,8 +8,10 @@ const checar = (ok, msg) => ok || erros.push(msg);
 // render.yaml: checagem por linha (shortcut: assume o formato "- key:" seguido de sync/generateValue; trocar por parser se o blueprint crescer)
 const blocos = ler('render.yaml').split(/^\s*- key:/m).slice(1);
 checar(blocos.length > 0, 'render.yaml sem envVars');
+const naoSecretas = ['CORS_ORIGENS'];
 for (const bloco of blocos) {
   const chave = bloco.split('\n')[0].trim();
+  if (naoSecretas.includes(chave)) continue;
   checar(/^\s*sync:\s*false\s*$/m.test(bloco) || /^\s*generateValue:\s*true\s*$/m.test(bloco), `render.yaml: ${chave} precisa de sync: false ou generateValue`);
   checar(!/^\s*value:/m.test(bloco), `render.yaml: ${chave} tem valor fixo`);
 }
