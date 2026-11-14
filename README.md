@@ -33,15 +33,18 @@ O Flyway cria as tabelas na primeira subida; não há passo de migration.
 ### 2. Backend no Render
 
 1. No Render, escolha **New > Blueprint** e conecte este repositório (usa o `render.yaml` da raiz).
+   Alternativa manual: **New > Web Service**, runtime **Docker**, branch com o código, sem Root Directory (o `Dockerfile` da raiz builda a API).
 2. Preencha as variáveis pedidas:
 
 | Variável | Valor |
 |---|---|
-| `DB_URL` | URL JDBC do Neon |
+| `DB_URL` | URL JDBC do Neon, ex.: `jdbc:postgresql://ep-xxx.sa-east-1.aws.neon.tech/neondb?sslmode=require` (sem usuário/senha na URL) |
 | `DB_USER` | usuário do Neon |
 | `DB_PASSWORD` | senha do Neon |
-| `JWT_SECRET` | gerada automaticamente pelo Render |
-| `CORS_ORIGENS` | URL do front na Vercel (preencha após o passo 3) |
+| `JWT_SECRET` | gerada automaticamente pelo Blueprint; no modo manual, gere uma com 32+ caracteres (ex.: `openssl rand -base64 48`) |
+| `CORS_ORIGENS` | URL do front na Vercel, sem barra final (preencha após o passo 3); várias separadas por vírgula |
+
+Não defina `SPRING_PROFILES_ACTIVE`: o profile `dev` só serve para rodar local. `PORT` é injetada pelo próprio Render. Health check: `/v3/api-docs`.
 
 3. Anote a URL pública do serviço (ex.: `https://finance-edu-api.onrender.com`).
 
