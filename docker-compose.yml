@@ -17,7 +17,7 @@ services:
       retries: 10
 
   api:
-    build: ./backend
+    build: .
     environment:
       # profile dev: só para rodar local; em produção use JWT_SECRET próprio (ver README)
       SPRING_PROFILES_ACTIVE: dev

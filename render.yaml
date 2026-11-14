@@ -2,7 +2,7 @@ services:
   - type: web
     name: finance-edu-api
     runtime: docker
-    rootDir: backend
+    dockerfilePath: ./Dockerfile
     plan: free
     healthCheckPath: /v3/api-docs
     envVars:

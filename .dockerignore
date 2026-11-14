@@ -1,0 +1,6 @@
+.git
+frontend
+docs
+captures
+backend/target
+*.md

@@ -23,7 +23,7 @@ checar(vercel.rewrites?.some((r) => r.destination === '/index.html'), 'vercel.js
 // Dockerfile: jar igual a artifactId-version do pom
 const pom = ler('backend/pom.xml').replace(/<parent>[\s\S]*?<\/parent>/, '');
 const jar = `${pom.match(/<artifactId>(.*?)<\/artifactId>/)[1]}-${pom.match(/<version>(.*?)<\/version>/)[1]}.jar`;
-checar(ler('backend/Dockerfile').includes(`/app/target/${jar}`), `Dockerfile: jar esperado ${jar}`);
+checar(ler('Dockerfile').includes(`/app/target/${jar}`), `Dockerfile: jar esperado ${jar}`);
 
 // environment de producao
 checar(/apiUrl:\s*'https:\/\//.test(ler('frontend/src/environments/environment.ts')), 'environment.ts: apiUrl precisa comecar com https://');
