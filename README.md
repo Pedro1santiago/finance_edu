@@ -19,16 +19,18 @@ cd backend && docker compose up -d && ./mvnw spring-boot:run -Dspring-boot.run.p
 cd frontend && npm install && npm start                        # app em :4200
 ```
 
-## Deploy (Neon, Render, Vercel)
+## Deploy (Supabase, Render, Vercel)
 
 Tudo no plano gratuito. Siga a ordem.
 
-### 1. Banco no Neon
+### 1. Banco no Supabase
 
-1. Crie um projeto no [Neon](https://neon.tech) e copie host, banco, usuário e senha.
-2. Monte a URL JDBC: `jdbc:postgresql://<host>/<db>?sslmode=require`.
+1. No [Supabase](https://supabase.com), abra o projeto e clique em **Connect**.
+2. Escolha **Session pooler** (porta `5432`, IPv4). Não use a conexão direta `db.<ref>.supabase.co` (só IPv6, o Render não alcança) nem o Transaction pooler `6543` (quebra prepared statements do JDBC).
+3. Monte a URL JDBC a partir do host do pooler: `jdbc:postgresql://aws-0-<regiao>.pooler.supabase.com:5432/postgres?sslmode=require`.
+4. O usuário do pooler é `postgres.<project-ref>`; a senha é a do banco (Project Settings > Database), não as chaves de API.
 
-O Flyway cria as tabelas na primeira subida; não há passo de migration.
+O Flyway cria as tabelas no schema `public` na primeira subida; não há passo de migration. As chaves `SUPABASE_*` do `.env` não são usadas pela API (ela tem login próprio com JWT).
 
 ### 2. Backend no Render
 
@@ -38,9 +40,9 @@ O Flyway cria as tabelas na primeira subida; não há passo de migration.
 
 | Variável | Valor |
 |---|---|
-| `DB_URL` | URL JDBC do Neon, ex.: `jdbc:postgresql://ep-xxx.sa-east-1.aws.neon.tech/neondb?sslmode=require` (sem usuário/senha na URL) |
-| `DB_USER` | usuário do Neon |
-| `DB_PASSWORD` | senha do Neon |
+| `DB_URL` | URL JDBC do Session pooler, ex.: `jdbc:postgresql://aws-0-sa-east-1.pooler.supabase.com:5432/postgres?sslmode=require` (sem usuário/senha na URL) |
+| `DB_USER` | `postgres.<project-ref>` |
+| `DB_PASSWORD` | senha do banco no Supabase |
 | `JWT_SECRET` | gerada automaticamente pelo Blueprint; no modo manual, gere uma com 32+ caracteres (ex.: `openssl rand -base64 48`) |
 | `CORS_ORIGENS` | URL do front na Vercel, sem barra final (preencha após o passo 3); várias separadas por vírgula |
 

@@ -8,6 +8,9 @@ spring:
     url: ${DB_URL}
     username: ${DB_USER}
     password: ${DB_PASSWORD}
+    hikari:
+      # pooler do Supabase (plano free) limita conexões por cliente
+      maximum-pool-size: ${DB_POOL_SIZE:5}
   mvc:
     problemdetails:
       enabled: true
